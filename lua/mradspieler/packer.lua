@@ -11,8 +11,7 @@ return require('packer').startup(function(use)
         -- or                            , branch = '0.1.x',
         requires = { {'nvim-lua/plenary.nvim'} }
     }
-    use({ 'rose-pine/neovim', as = 'rose-pine' })
-    vim.cmd('colorscheme rose-pine')
+    use { "ellisonleao/gruvbox.nvim" }
     use {
         'nvim-treesitter/nvim-treesitter',
         run = ':TSUpdate'
@@ -92,7 +91,6 @@ return require('packer').startup(function(use)
             })
         end
     })
-    -- Lua
     use({
         "gbprod/substitute.nvim",
         config = function()
@@ -119,4 +117,15 @@ return require('packer').startup(function(use)
             })
         end
     })
+    use {
+        'declancm/cinnamon.nvim',
+        config = function() require('cinnamon').setup() end
+    }
+    use('beauwilliams/statusline.lua')
+    use {
+        'numToStr/Comment.nvim',
+        config = function()
+            require('Comment').setup()
+        end
+    }
 end)

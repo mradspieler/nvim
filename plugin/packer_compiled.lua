@@ -74,10 +74,22 @@ end
 time([[try_loadstring definition]], false)
 time([[Defining packer_plugins]], true)
 _G.packer_plugins = {
+  ["Comment.nvim"] = {
+    config = { "\27LJ\2\n5\0\0\3\0\3\0\0066\0\0\0'\2\1\0B\0\2\0029\0\2\0B\0\1\1K\0\1\0\nsetup\fComment\frequire\0" },
+    loaded = true,
+    path = "/Users/q293643/.local/share/nvim/site/pack/packer/start/Comment.nvim",
+    url = "https://github.com/numToStr/Comment.nvim"
+  },
   LuaSnip = {
     loaded = true,
     path = "/Users/q293643/.local/share/nvim/site/pack/packer/start/LuaSnip",
     url = "https://github.com/L3MON4D3/LuaSnip"
+  },
+  ["cinnamon.nvim"] = {
+    config = { "\27LJ\2\n6\0\0\3\0\3\0\0066\0\0\0'\2\1\0B\0\2\0029\0\2\0B\0\1\1K\0\1\0\nsetup\rcinnamon\frequire\0" },
+    loaded = true,
+    path = "/Users/q293643/.local/share/nvim/site/pack/packer/start/cinnamon.nvim",
+    url = "https://github.com/declancm/cinnamon.nvim"
   },
   ["cmp-buffer"] = {
     loaded = true,
@@ -129,6 +141,11 @@ _G.packer_plugins = {
     loaded = true,
     path = "/Users/q293643/.local/share/nvim/site/pack/packer/start/fzf.vim",
     url = "https://github.com/junegunn/fzf.vim"
+  },
+  ["gruvbox.nvim"] = {
+    loaded = true,
+    path = "/Users/q293643/.local/share/nvim/site/pack/packer/start/gruvbox.nvim",
+    url = "https://github.com/ellisonleao/gruvbox.nvim"
   },
   harpoon = {
     loaded = true,
@@ -185,13 +202,13 @@ _G.packer_plugins = {
     path = "/Users/q293643/.local/share/nvim/site/pack/packer/start/plenary.nvim",
     url = "https://github.com/nvim-lua/plenary.nvim"
   },
-  ["rose-pine"] = {
+  ["statusline.lua"] = {
     loaded = true,
-    path = "/Users/q293643/.local/share/nvim/site/pack/packer/start/rose-pine",
-    url = "https://github.com/rose-pine/neovim"
+    path = "/Users/q293643/.local/share/nvim/site/pack/packer/start/statusline.lua",
+    url = "https://github.com/beauwilliams/statusline.lua"
   },
   ["substitute.nvim"] = {
-    config = { "\27LJ\2\nû\2\0\0\4\0\n\0\r6\0\0\0'\2\1\0B\0\2\0029\0\2\0005\2\3\0005\3\4\0=\3\5\0025\3\6\0=\3\a\0025\3\b\0=\3\t\2B\0\2\1K\0\1\0\rexchange\1\0\2\vmotion\1\22use_esc_to_cancel\2\nrange\1\0\a\18complete_word\1\fconfirm\1\24prompt_current_text\1\vprefix\6s\vsuffix\5\fmotion2\1\fmotion1\1\31highlight_substituted_text\1\0\2\ntimer\3Ù\3\fenabled\2\1\0\1\26yank_substituted_text\1\nsetup\15substitute\frequire\0" },
+    config = { "\27LJ\2\nû\2\0\0\4\0\n\0\r6\0\0\0'\2\1\0B\0\2\0029\0\2\0005\2\3\0005\3\4\0=\3\5\0025\3\6\0=\3\a\0025\3\b\0=\3\t\2B\0\2\1K\0\1\0\rexchange\1\0\2\22use_esc_to_cancel\2\vmotion\1\nrange\1\0\a\fmotion2\1\fmotion1\1\vprefix\6s\vsuffix\5\18complete_word\1\24prompt_current_text\1\fconfirm\1\31highlight_substituted_text\1\0\2\ntimer\3Ù\3\fenabled\2\1\0\1\26yank_substituted_text\1\nsetup\15substitute\frequire\0" },
     loaded = true,
     path = "/Users/q293643/.local/share/nvim/site/pack/packer/start/substitute.nvim",
     url = "https://github.com/gbprod/substitute.nvim"
@@ -212,7 +229,7 @@ _G.packer_plugins = {
     url = "https://github.com/dstein64/vim-startuptime"
   },
   ["yanky.nvim"] = {
-    config = { "\27LJ\2\n‹\2\0\0\5\0\18\0\0216\0\0\0'\2\1\0B\0\2\0029\0\2\0005\2\4\0005\3\3\0=\3\5\0025\3\a\0005\4\6\0=\4\b\0035\4\t\0=\4\n\3=\3\v\0025\3\f\0=\3\r\0025\3\14\0=\3\15\0025\3\16\0=\3\17\2B\0\2\1K\0\1\0\29preserve_cursor_position\1\0\1\fenabled\2\14highlight\1\0\3\fon_yank\2\ntimer\3Ù\3\von_put\2\21system_clipboard\1\0\1\19sync_with_ring\2\vpicker\14telescope\1\0\0\vselect\1\0\0\1\0\0\tring\1\0\0\1\0\4\fstorage\nshada\19history_length\3d!sync_with_numbered_registers\2\17cancel_event\vupdate\nsetup\nyanky\frequire\0" },
+    config = { "\27LJ\2\n‹\2\0\0\5\0\18\0\0216\0\0\0'\2\1\0B\0\2\0029\0\2\0005\2\4\0005\3\3\0=\3\5\0025\3\a\0005\4\6\0=\4\b\0035\4\t\0=\4\n\3=\3\v\0025\3\f\0=\3\r\0025\3\14\0=\3\15\0025\3\16\0=\3\17\2B\0\2\1K\0\1\0\29preserve_cursor_position\1\0\1\fenabled\2\14highlight\1\0\3\fon_yank\2\ntimer\3Ù\3\von_put\2\21system_clipboard\1\0\1\19sync_with_ring\2\vpicker\14telescope\1\0\0\vselect\1\0\0\1\0\0\tring\1\0\0\1\0\4\17cancel_event\vupdate\fstorage\nshada!sync_with_numbered_registers\2\19history_length\3d\nsetup\nyanky\frequire\0" },
     loaded = true,
     path = "/Users/q293643/.local/share/nvim/site/pack/packer/start/yanky.nvim",
     url = "https://github.com/gbprod/yanky.nvim"
@@ -222,16 +239,24 @@ _G.packer_plugins = {
 time([[Defining packer_plugins]], false)
 -- Config for: yanky.nvim
 time([[Config for yanky.nvim]], true)
-try_loadstring("\27LJ\2\n‹\2\0\0\5\0\18\0\0216\0\0\0'\2\1\0B\0\2\0029\0\2\0005\2\4\0005\3\3\0=\3\5\0025\3\a\0005\4\6\0=\4\b\0035\4\t\0=\4\n\3=\3\v\0025\3\f\0=\3\r\0025\3\14\0=\3\15\0025\3\16\0=\3\17\2B\0\2\1K\0\1\0\29preserve_cursor_position\1\0\1\fenabled\2\14highlight\1\0\3\fon_yank\2\ntimer\3Ù\3\von_put\2\21system_clipboard\1\0\1\19sync_with_ring\2\vpicker\14telescope\1\0\0\vselect\1\0\0\1\0\0\tring\1\0\0\1\0\4\fstorage\nshada\19history_length\3d!sync_with_numbered_registers\2\17cancel_event\vupdate\nsetup\nyanky\frequire\0", "config", "yanky.nvim")
+try_loadstring("\27LJ\2\n‹\2\0\0\5\0\18\0\0216\0\0\0'\2\1\0B\0\2\0029\0\2\0005\2\4\0005\3\3\0=\3\5\0025\3\a\0005\4\6\0=\4\b\0035\4\t\0=\4\n\3=\3\v\0025\3\f\0=\3\r\0025\3\14\0=\3\15\0025\3\16\0=\3\17\2B\0\2\1K\0\1\0\29preserve_cursor_position\1\0\1\fenabled\2\14highlight\1\0\3\fon_yank\2\ntimer\3Ù\3\von_put\2\21system_clipboard\1\0\1\19sync_with_ring\2\vpicker\14telescope\1\0\0\vselect\1\0\0\1\0\0\tring\1\0\0\1\0\4\17cancel_event\vupdate\fstorage\nshada!sync_with_numbered_registers\2\19history_length\3d\nsetup\nyanky\frequire\0", "config", "yanky.nvim")
 time([[Config for yanky.nvim]], false)
+-- Config for: cinnamon.nvim
+time([[Config for cinnamon.nvim]], true)
+try_loadstring("\27LJ\2\n6\0\0\3\0\3\0\0066\0\0\0'\2\1\0B\0\2\0029\0\2\0B\0\1\1K\0\1\0\nsetup\rcinnamon\frequire\0", "config", "cinnamon.nvim")
+time([[Config for cinnamon.nvim]], false)
+-- Config for: Comment.nvim
+time([[Config for Comment.nvim]], true)
+try_loadstring("\27LJ\2\n5\0\0\3\0\3\0\0066\0\0\0'\2\1\0B\0\2\0029\0\2\0B\0\1\1K\0\1\0\nsetup\fComment\frequire\0", "config", "Comment.nvim")
+time([[Config for Comment.nvim]], false)
+-- Config for: substitute.nvim
+time([[Config for substitute.nvim]], true)
+try_loadstring("\27LJ\2\nû\2\0\0\4\0\n\0\r6\0\0\0'\2\1\0B\0\2\0029\0\2\0005\2\3\0005\3\4\0=\3\5\0025\3\6\0=\3\a\0025\3\b\0=\3\t\2B\0\2\1K\0\1\0\rexchange\1\0\2\22use_esc_to_cancel\2\vmotion\1\nrange\1\0\a\fmotion2\1\fmotion1\1\vprefix\6s\vsuffix\5\18complete_word\1\24prompt_current_text\1\fconfirm\1\31highlight_substituted_text\1\0\2\ntimer\3Ù\3\fenabled\2\1\0\1\26yank_substituted_text\1\nsetup\15substitute\frequire\0", "config", "substitute.nvim")
+time([[Config for substitute.nvim]], false)
 -- Config for: cutlass.nvim
 time([[Config for cutlass.nvim]], true)
 try_loadstring("\27LJ\2\nF\0\0\3\0\4\0\a6\0\0\0'\2\1\0B\0\2\0029\0\2\0005\2\3\0B\0\2\1K\0\1\0\1\0\1\fcut_key\6m\nsetup\fcutlass\frequire\0", "config", "cutlass.nvim")
 time([[Config for cutlass.nvim]], false)
--- Config for: substitute.nvim
-time([[Config for substitute.nvim]], true)
-try_loadstring("\27LJ\2\nû\2\0\0\4\0\n\0\r6\0\0\0'\2\1\0B\0\2\0029\0\2\0005\2\3\0005\3\4\0=\3\5\0025\3\6\0=\3\a\0025\3\b\0=\3\t\2B\0\2\1K\0\1\0\rexchange\1\0\2\vmotion\1\22use_esc_to_cancel\2\nrange\1\0\a\18complete_word\1\fconfirm\1\24prompt_current_text\1\vprefix\6s\vsuffix\5\fmotion2\1\fmotion1\1\31highlight_substituted_text\1\0\2\ntimer\3Ù\3\fenabled\2\1\0\1\26yank_substituted_text\1\nsetup\15substitute\frequire\0", "config", "substitute.nvim")
-time([[Config for substitute.nvim]], false)
 
 _G._packer.inside_compile = false
 if _G._packer.needs_bufread == true then
