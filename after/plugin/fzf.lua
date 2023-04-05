@@ -1,0 +1,11 @@
+local opts = { noremap = true, silent = true }
+vim.keymap.set("n", "<leader>ff", vim.cmd.Files, opts)
+vim.keymap.set("n", "<leader>fg", vim.cmd.GFiles, opts)
+vim.keymap.set("n", "<leader>fg?", '<Cmd>GFiles?<CR>', opts)
+vim.keymap.set("n", "<leader>fb", vim.cmd.Buffers, opts)
+vim.keymap.set("n", "<leader>fl", vim.cmd.Lines, opts)
+vim.keymap.set("n", "<leader>fbl", vim.cmd.BLines, opts)
+vim.keymap.set("n", "<leader>fch", '<Cmd>:History:<CR>', opts)
+vim.keymap.set("n", "<leader>fru", vim.cmd.History, opts)
+vim.keymap.set("n", "<leader>fsh", '<Cmd>:History/<CR>', opts)
+vim.keymap.set("n", "<leader>rg", vim.cmd.Rg, opts)

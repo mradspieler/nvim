@@ -1,0 +1,122 @@
+-- This file can be loaded by calling `lua require('plugins')` from your init.vim
+
+-- Only required if you have packer configured as `opt`
+vim.cmd [[packadd packer.nvim]]
+
+return require('packer').startup(function(use)
+    -- Packer can manage itself
+    use 'wbthomason/packer.nvim'
+    use {
+        'nvim-telescope/telescope.nvim', tag = '0.1.1',
+        -- or                            , branch = '0.1.x',
+        requires = { {'nvim-lua/plenary.nvim'} }
+    }
+    use({ 'rose-pine/neovim', as = 'rose-pine' })
+    vim.cmd('colorscheme rose-pine')
+    use {
+        'nvim-treesitter/nvim-treesitter',
+        run = ':TSUpdate'
+    }
+    use("nvim-treesitter/playground")
+    use("theprimeagen/harpoon")
+    -- use("theprimeagen/refactoring.nvim")
+    use("mbbill/undotree")
+    -- use("tpope/vim-fugitive")
+    -- use("nvim-treesitter/nvim-treesitter-context");
+    use {
+        'VonHeikemen/lsp-zero.nvim',
+        branch = 'v1.x',
+        requires = {
+            -- LSP Support
+            {'neovim/nvim-lspconfig'},
+            {'williamboman/mason.nvim'},
+            {'williamboman/mason-lspconfig.nvim'},
+
+            -- Autocompletion
+            {'hrsh7th/nvim-cmp'},
+            {'hrsh7th/cmp-buffer'},
+            {'hrsh7th/cmp-path'},
+            {'saadparwaiz1/cmp_luasnip'},
+            {'hrsh7th/cmp-nvim-lsp'},
+            {'hrsh7th/cmp-nvim-lua'},
+
+            -- Snippets
+            {'L3MON4D3/LuaSnip'},
+            {'rafamadriz/friendly-snippets'},
+        }
+    }
+    use('crispgm/nvim-go')
+    use { 'junegunn/fzf', run = ":call fzf#install()" }
+    use { 'junegunn/fzf.vim' }
+    use('dominickng/fzf-session.vim')
+    -- use('kyoh86/vim-go-coverage')
+    -- use('sebdah/vim-delve')
+    use('dstein64/vim-startuptime')
+    use({
+        "gbprod/cutlass.nvim",
+        config = function()
+            require("cutlass").setup({
+                cut_key = "m",
+            })
+        end
+    })
+    use({
+        "gbprod/yanky.nvim",
+        config = function()
+            require("yanky").setup({
+                ring = {
+                    history_length = 100,
+                    storage = "shada",
+                    sync_with_numbered_registers = true,
+                    cancel_event = "update",
+                },
+                picker = {
+                    select = {
+                        action = nil, -- nil to use default put action
+                    },
+                    telescope = {
+                        mappings = nil, -- nil to use default mappings
+                    },
+                },
+                system_clipboard = {
+                    sync_with_ring = true,
+                },
+                highlight = {
+                    on_put = true,
+                    on_yank = true,
+                    timer = 500,
+                },
+                preserve_cursor_position = {
+                    enabled = true,
+                },
+            })
+        end
+    })
+    -- Lua
+    use({
+        "gbprod/substitute.nvim",
+        config = function()
+            require("substitute").setup({
+                on_substitute = nil,
+                yank_substituted_text = false,
+                highlight_substituted_text = {
+                    enabled = true,
+                    timer = 500,
+                },
+                range = {
+                    prefix = "s",
+                    prompt_current_text = false,
+                    confirm = false,
+                    complete_word = false,
+                    motion1 = false,
+                    motion2 = false,
+                    suffix = "",
+                },
+                exchange = {
+                    motion = false,
+                    use_esc_to_cancel = true,
+                }
+            })
+        end
+    })
+end)
