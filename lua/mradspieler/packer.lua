@@ -44,10 +44,8 @@ return require('packer').startup(function(use)
             {'rafamadriz/friendly-snippets'},
         }
     }
-    use('crispgm/nvim-go')
-    use { 'junegunn/fzf', run = ":call fzf#install()" }
-    use { 'junegunn/fzf.vim' }
-    use('dominickng/fzf-session.vim')
+    -- use('crispgm/nvim-go')
+    use( 'ray-x/go.nvim')
     -- use('kyoh86/vim-go-coverage')
     -- use('sebdah/vim-delve')
     use('dstein64/vim-startuptime')
@@ -127,5 +125,8 @@ return require('packer').startup(function(use)
         config = function()
             require('Comment').setup()
         end
+    }
+    use { 'ibhagwan/fzf-lua',
+        requires = { 'nvim-tree/nvim-web-devicons' }
     }
 end)
