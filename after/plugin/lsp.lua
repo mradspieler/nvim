@@ -3,18 +3,7 @@ local lsp = require("lsp-zero")
 lsp.preset("recommended")
 
 lsp.ensure_installed({
-    'jsonls', 'gopls', 'awk_ls', 'kotlin_language_server', 'bashls', 'yamlls', 'dockerls', 'rust_analyzer', 'ansiblels', 'tsserver'
-})
-
--- Fix Undefined global 'vim'
-lsp.configure('lua-language-server', {
-	settings = {
-		Lua = {
-			diagnostics = {
-				globals = { 'vim' }
-			}
-		}
-	}
+    'lua_ls', 'jsonls', 'gopls', 'awk_ls', 'kotlin_language_server', 'bashls', 'yamlls', 'dockerls', 'rust_analyzer', 'ansiblels', 'tsserver', 'sqlls'
 })
 
 local cmp = require('cmp')
