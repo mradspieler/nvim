@@ -119,6 +119,7 @@ return require('packer').startup(function(use)
         config = function() require('cinnamon').setup() end
     }
     use('beauwilliams/statusline.lua')
+    use('preservim/tagbar')
     use {
         'numToStr/Comment.nvim',
         config = function()
@@ -127,5 +128,22 @@ return require('packer').startup(function(use)
     }
     use { 'ibhagwan/fzf-lua',
         requires = { 'nvim-tree/nvim-web-devicons' }
+    }
+    -- Unless you are still migrating, remove the deprecated commands from v1.x
+    vim.cmd([[ let g:neo_tree_remove_legacy_commands = 1 ]])
+
+    use {
+        "nvim-neo-tree/neo-tree.nvim",
+        branch = "v2.x",
+        requires = {
+            "nvim-lua/plenary.nvim",
+            "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+            "MunifTanjim/nui.nvim",
+        }
+    }
+
+    use {
+        "windwp/nvim-autopairs",
+        config = function() require("nvim-autopairs").setup {} end
     }
 end)
