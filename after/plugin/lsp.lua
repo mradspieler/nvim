@@ -1,6 +1,4 @@
-local lsp = require("lsp-zero")
-
-lsp.preset("recommended")
+local lsp = require("lsp-zero").preset("recommended")
 
 lsp.ensure_installed({
     'lua_ls', 'jsonls', 'gopls', 'awk_ls', 'kotlin_language_server', 'bashls', 'yamlls', 'dockerls', 'rust_analyzer',
@@ -43,6 +41,7 @@ lsp.on_attach(function(client, bufnr)
     vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
 end)
 
+lsp.skip_server_setup({ 'jdtls' })
 lsp.setup()
 
 vim.diagnostic.config({
