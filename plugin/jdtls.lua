@@ -1,4 +1,7 @@
 local java_cmds = vim.api.nvim_create_augroup('java_cmds', { clear = true })
+
+vim.diagnostic.disable()
+
 local cache_vars = {}
 
 local root_files = {
@@ -85,14 +88,10 @@ local function get_jdtls_paths()
         -- https://github.com/eclipse/eclipse.jdt.ls/wiki/Running-the-JAVA-LS-server-from-the-command-line#initialize-request
         --
         -- This example assume you are using sdkman: https://sdkman.io
-        -- {
-        --   name = 'JavaSE-17',
-        --   path = vim.fn.expand('~/.sdkman/candidates/java/17.0.6-tem'),
-        -- },
-        -- {
-        --   name = 'JavaSE-18',
-        --   path = vim.fn.expand('~/.sdkman/candidates/java/18.0.2-amzn'),
-        -- },
+        {
+            name = 'JavaSE-19',
+            path = vim.fn.expand('~/.sdkman/candidates/java/current'),
+        },
     }
 
     cache_vars.paths = path
