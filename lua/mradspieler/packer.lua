@@ -19,8 +19,28 @@ return require('packer').startup(function(use)
     -- use("nvim-treesitter/nvim-treesitter-context");
     use("theprimeagen/harpoon")
     -- use("theprimeagen/refactoring.nvim")
+
+    -- Git related plugins
+    use('tpope/vim-fugitive')
+    use('tpope/vim-rhubarb')
+    use {
+        'lewis6991/gitsigns.nvim',
+        -- tag = 'release' -- To use the latest release (do not use this if you run Neovim nightly or dev builds!)
+    }
+
+    use({
+        "folke/trouble.nvim",
+        config = function()
+            require("trouble").setup {
+                icons = false,
+                -- your configuration comes here
+                -- or leave it empty to use the default settings
+                -- refer to the configuration section below
+            }
+        end
+    })
+
     use("mbbill/undotree")
-    -- use("tpope/vim-fugitive")
     use {
         'VonHeikemen/lsp-zero.nvim',
         requires = {
@@ -120,7 +140,14 @@ return require('packer').startup(function(use)
         'declancm/cinnamon.nvim',
         config = function() require('cinnamon').setup() end
     }
-    use('beauwilliams/statusline.lua')
+
+    -- statusline
+    use {
+        'nvim-lualine/lualine.nvim',
+        requires = { 'nvim-tree/nvim-web-devicons', opt = true }
+    }
+    -- use('beauwilliams/statusline.lua')
+
     use('preservim/tagbar')
     use {
         'numToStr/Comment.nvim',
