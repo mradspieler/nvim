@@ -11,16 +11,16 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- ChangeBackground changes the background mode based on macOS's `Appearance setting.` 
-local function change_background()
-  local m = vim.fn.system("defaults read -g AppleInterfaceStyle")
-  m = m:gsub("%s+", "") -- trim whitespace
-  if m == "Dark" then
-    vim.o.background = "dark" 
-  else
-    vim.o.background = "light" 
-  end
-end
+-- ChangeBackground changes the background mode based on macOS's `Appearance setting.`
+-- local function change_background()
+--   local m = vim.fn.system("defaults read -g AppleInterfaceStyle")
+--   m = m:gsub("%s+", "") -- trim whitespace
+--   if m == "Dark" then
+--     vim.o.background = "dark"
+--   else
+--     vim.o.background = "light"
+--   end
+-- end
 
 ----------------
 --- plugins ---
@@ -28,23 +28,23 @@ end
 require("lazy").setup({
 
   -- colorscheme
-  { 
-    "ellisonleao/gruvbox.nvim", 
+  {
+    "ellisonleao/gruvbox.nvim",
     priority = 1000, -- make sure to load this before all the other start plugins
-    config = function ()
-      change_background()
+    config = function()
+      --change_background()
       require("gruvbox").setup({
-        contrast = "hard"
+        -- contrast = "hard"
       })
       vim.cmd([[colorscheme gruvbox]])
     end,
   },
 
   -- statusline
-  { 
+  {
     "nvim-lualine/lualine.nvim",
     dependencies = { 'nvim-tree/nvim-web-devicons' },
-    config = function ()
+    config = function()
       require("lualine").setup({
         options = { theme = 'gruvbox' },
         sections = {
@@ -52,7 +52,7 @@ require("lazy").setup({
             {
               'filename',
               file_status = true, -- displays file status (readonly status, modified status)
-              path = 2 -- 0 = just filename, 1 = relative path, 2 = absolute path
+              path = 2            -- 0 = just filename, 1 = relative path, 2 = absolute path
             }
           }
         }
@@ -63,11 +63,10 @@ require("lazy").setup({
   -- search selection via *
   { 'bronson/vim-visual-star-search' },
 
-
-  -- git 
+  -- git
   {
     'dinhhuy258/git.nvim',
-    config = function ()
+    config = function()
       require("git").setup()
     end,
   },
@@ -75,7 +74,7 @@ require("lazy").setup({
   {
     'lewis6991/gitsigns.nvim',
     -- tag = 'release' -- To use the latest release (do not use this if you run Neovim nightly or dev builds!)
-    config = function ()
+    config = function()
       require("gitsigns").setup()
     end,
   },
@@ -123,8 +122,8 @@ require("lazy").setup({
     "ethanholz/nvim-lastplace",
     config = function()
       require("nvim-lastplace").setup({
-        lastplace_ignore_buftype = {"quickfix", "nofile", "help"},
-        lastplace_ignore_filetype = {"gitcommit", "gitrebase", "svn", "hgcommit"},
+        lastplace_ignore_buftype = { "quickfix", "nofile", "help" },
+        lastplace_ignore_filetype = { "gitcommit", "gitrebase", "svn", "hgcommit" },
         lastplace_open_folds = true
       })
     end,
@@ -146,118 +145,34 @@ require("lazy").setup({
 
   -- programming languages / debugger
   {
-    "ray-x/navigator.lua",
-    config = function()
-      require("navigator").setup()
-    end,
-  },
-
-  {
-    "ray-x/go.nvim",
-    dependencies = {  -- optional packages
-      "ray-x/guihua.lua",
-      "neovim/nvim-lspconfig",
-      "ray-x/navigator.lua",
-      "mfussenegger/nvim-dap",
-      "nvim-treesitter/nvim-treesitter",
-    },
-    config = function()
-      require("go").setup()
-      local format_sync_grp = vim.api.nvim_create_augroup("GoImport", {})
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        pattern = "*.go",
-        callback = function()
-          require('go.format').goimport()
+    'VonHeikemen/lsp-zero.nvim',
+    branch = 'v2.x',
+    dependencies = {
+      -- LSP Support
+      { 'neovim/nvim-lspconfig' }, -- Required
+      {                            -- Optional
+        'williamboman/mason.nvim',
+        build = function()
+          pcall(vim.cmd, 'MasonUpdate')
         end,
-        group = format_sync_grp,
-      })
-    end,
-    event = {"CmdlineEnter"},
-    ft = {"go", 'gomod'},
-    build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
-  },
+      },
+      { 'williamboman/mason-lspconfig.nvim' }, -- Optional
 
-  { "rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap"} },
-
-  -- use('mfussenegger/nvim-jdtls')
-
-  -- commenting out lines
-  {
-    "numToStr/Comment.nvim",
+      -- Autocompletion
+      { 'hrsh7th/nvim-cmp' },     -- Required
+      { 'hrsh7th/cmp-nvim-lsp' }, -- Required
+      { 'L3MON4D3/LuaSnip' },     -- Required
+    },
     config = function()
-      require('Comment').setup({
-        opleader = {
-          ---Block-comment keymap
-          block = '<Nop>',
-        },
-      }) 
-    end
-  },
+      local lsp = require('lsp-zero').preset({})
 
-  {
-    "bennypowers/splitjoin.nvim",
-    keys = {
-      { 'gJ', function() require'splitjoin'.join() end, desc = 'Join the object under cursor' },
-      { 'gS', function() require'splitjoin'.split() end, desc = 'Split the object under cursor' },
-    },
-  },
+      lsp.on_attach(function(client, bufnr)
+        lsp.default_keymaps({ buffer = bufnr })
+      end)
 
-  -- fzf extension for telescope with better speed
-  {
-    "nvim-telescope/telescope-fzf-native.nvim", run = 'make' 
-  },
-
-  {'nvim-telescope/telescope-ui-select.nvim' },
-
-  -- fuzzy finder framework
-  {
-    "nvim-telescope/telescope.nvim", 
-    tag = '0.1.1',
-    dependencies = { 
-      "nvim-lua/plenary.nvim" ,
-      "nvim-treesitter/nvim-treesitter",
-      "nvim-tree/nvim-web-devicons",
-    },
-    config = function ()
-      require("telescope").setup({
-        extensions = {
-          fzf = {
-            fuzzy = true,                    -- false will only do exact matching
-            override_generic_sorter = true,  -- override the generic sorter
-            override_file_sorter = true,     -- override the file sorter
-            case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
-            -- the default case_mode is "smart_case"
-          }
-        }
-      })
-
-      -- To get fzf loaded and working with telescope, you need to call
-      -- load_extension, somewhere after setup function:
-      require('telescope').load_extension('fzf')
-
-      -- To get ui-select loaded and working with telescope, you need to call
-      -- load_extension, somewhere after setup function:
-      require("telescope").load_extension("ui-select")
-    end,
-  },
-
-  -- mason
-  {
-    "williamboman/mason.nvim",
-    "williamboman/mason-lspconfig.nvim",
-    build = ":MasonUpdate", -- :MasonUpdate updates registry contents
-    require("mason").setup()
-  },
-
-  -- lsp-config
-  {
-    "neovim/nvim-lspconfig", 
-    config = function ()
-      util = require "lspconfig/util"
-
-      local capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
-      capabilities.textDocument.completion.completionItem.snippetSupport = true
-      require("lspconfig").gopls.setup({
+      -- (Optional) Configure lua language server for neovim
+      require('lspconfig').lua_ls.setup(lsp.nvim_lua_ls())
+      require('lspconfig').gopls.setup({
         capabilities = capabilities,
         flags = { debounce_text_changes = 200 },
         settings = {
@@ -297,11 +212,128 @@ require("lazy").setup({
           },
         },
       })
+
+      lsp.setup()
+    end,
+  },
+
+  {
+    "ray-x/navigator.lua",
+    config = function()
+      require("navigator").setup({
+        mason = true,
+        lsp = {
+          tsserver = { cmd = { '/home/user/.local/share/nvim/mason/bin/tsserver' } },
+          gopls = { cmd = { '/Users/Q293643/.local/share/nvim/mason/bin/gopls' } }
+        }
+      })
+    end,
+  },
+
+  {
+    "ray-x/go.nvim",
+    dependencies = { -- optional packages
+      "ray-x/guihua.lua",
+      "neovim/nvim-lspconfig",
+      "ray-x/navigator.lua",
+      "mfussenegger/nvim-dap",
+      "nvim-treesitter/nvim-treesitter",
+    },
+    config = function()
+      require("go").setup({
+        luasnip = true,
+        trouble = true
+      })
+      local format_sync_grp = vim.api.nvim_create_augroup("GoImport", {})
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        pattern = "*.go",
+        callback = function()
+          require('go.format').goimport()
+        end,
+        group = format_sync_grp,
+      })
+    end,
+    event = { "CmdlineEnter" },
+    ft = { "go", 'gomod' },
+    build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
+  },
+
+  { "rcarriga/nvim-dap-ui",          requires = { "mfussenegger/nvim-dap" } },
+
+  -- use('mfussenegger/nvim-jdtls')
+
+  {
+    "folke/trouble.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    opts = {
+      -- your configuration comes here
+      -- or leave it empty to use the default settings
+      -- refer to the configuration section below
+    },
+  },
+
+  -- commenting out lines
+  {
+    "numToStr/Comment.nvim",
+    config = function()
+      require('Comment').setup({
+        opleader = {
+          ---Block-comment keymap
+          block = '<Nop>',
+        },
+      })
+    end
+  },
+
+  {
+    "bennypowers/splitjoin.nvim",
+    keys = {
+      { 'gJ', function() require 'splitjoin'.join() end,  desc = 'Join the object under cursor' },
+      { 'gS', function() require 'splitjoin'.split() end, desc = 'Split the object under cursor' },
+    },
+  },
+
+  -- fzf extension for telescope with better speed
+  {
+    "nvim-telescope/telescope-fzf-native.nvim", run = 'make'
+  },
+
+  { 'nvim-telescope/telescope-ui-select.nvim' },
+
+  -- fuzzy finder framework
+  {
+    "nvim-telescope/telescope.nvim",
+    tag = '0.1.1',
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-treesitter/nvim-treesitter",
+      "nvim-tree/nvim-web-devicons",
+    },
+    config = function()
+      require("telescope").setup({
+        extensions = {
+          fzf = {
+            fuzzy = true,                   -- false will only do exact matching
+            override_generic_sorter = true, -- override the generic sorter
+            override_file_sorter = true,    -- override the file sorter
+            case_mode = "smart_case",       -- or "ignore_case" or "respect_case"
+            -- the default case_mode is "smart_case"
+          }
+        }
+      })
+
+      -- To get fzf loaded and working with telescope, you need to call
+      -- load_extension, somewhere after setup function:
+      require('telescope').load_extension('fzf')
+
+      -- To get ui-select loaded and working with telescope, you need to call
+      -- load_extension, somewhere after setup function:
+      require("telescope").load_extension("ui-select")
     end,
   },
 
   -- Highlight, edit, and navigate code
-  { 
+  {
     'nvim-treesitter/nvim-treesitter',
     dependencies = {
       'nvim-treesitter/nvim-treesitter-textobjects',
@@ -310,44 +342,44 @@ require("lazy").setup({
     config = function()
       require('nvim-treesitter.configs').setup({
         ensure_installed = {
-          "vim", 
-          "vimdoc", 
-          "javascript", 
-          "typescript", 
-          "c", 
-          "lua", 
-          "rust", 
-          "go", 
-          "gomod", 
-          "diff", 
-          "dockerfile", 
-          "bash", 
-          "toml", 
-          "sql", 
-          "svelte", 
-          "regex", 
-          "python", 
-          "make", 
+          "vim",
+          "vimdoc",
+          "javascript",
+          "typescript",
+          "c",
+          "lua",
+          "rust",
+          "go",
+          "gomod",
+          "diff",
+          "dockerfile",
+          "bash",
+          "toml",
+          "sql",
+          "svelte",
+          "regex",
+          "python",
+          "make",
           'markdown',
           'markdown_inline',
-          "kotlin", 
-          "java", 
-          "json", 
-          "jq", 
-          "html", 
-          "http", 
-          "gitcommit", 
-          "git_rebase", 
-          "yaml" 
+          "kotlin",
+          "java",
+          "json",
+          "jq",
+          "html",
+          "http",
+          "gitcommit",
+          "git_rebase",
+          "yaml"
         },
         indent = { enable = true },
         incremental_selection = {
           enable = true,
           keymaps = {
-            init_selection = "<space>", -- maps in normal mode to init the node/scope selection with space
+            init_selection = "<space>",   -- maps in normal mode to init the node/scope selection with space
             node_incremental = "<space>", -- increment to the upper named parent
-            node_decremental = "<bs>", -- decrement to the previous node
-            scope_incremental = "<tab>", -- increment to the upper scope (as defined in locals.scm)
+            node_decremental = "<bs>",    -- decrement to the previous node
+            scope_incremental = "<tab>",  -- increment to the upper scope (as defined in locals.scm)
           },
         },
         autopairs = {
@@ -419,7 +451,7 @@ require("lazy").setup({
 
   {
     "windwp/nvim-autopairs",
-    config = function() 
+    config = function()
       require("nvim-autopairs").setup {
         check_ts = true,
       }
@@ -429,7 +461,7 @@ require("lazy").setup({
   {
     "L3MON4D3/LuaSnip",
     dependencies = { "rafamadriz/friendly-snippets" },
-    config = function() 
+    config = function()
       require("luasnip.loaders.from_vscode").lazy_load()
     end
   },
@@ -485,7 +517,7 @@ require("lazy").setup({
           ['<Tab>'] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_next_item()
-            elseif luasnip.expand_or_locally_jumpable() then 
+            elseif luasnip.expand_or_locally_jumpable() then
               luasnip.expand_or_jump()
             elseif has_words_before() then
               cmp.complete()
@@ -519,8 +551,8 @@ require("lazy").setup({
         },
         sources = {
           { name = 'nvim_lsp' },
-          { name = "luasnip", keyword_length = 2},
-          { name = "buffer", keyword_length = 5},
+          { name = "luasnip", keyword_length = 2 },
+          { name = "buffer",  keyword_length = 5 },
         },
       })
     end,
@@ -535,28 +567,28 @@ require("lazy").setup({
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
-vim.opt.termguicolors = true -- Enable 24-bit RGB colors
+vim.opt.termguicolors = true                      -- Enable 24-bit RGB colors
 
-vim.opt.number = true        -- Show line numbers
-vim.opt.showmatch = true     -- Highlight matching parenthesis
-vim.opt.splitright = true    -- Split windows right to the current windows
-vim.opt.splitbelow = true    -- Split windows below to the current windows
-vim.opt.autowrite = true     -- Automatically save before :next, :make etc.
-vim.opt.autochdir = true     -- Change CWD when I open a file
+vim.opt.number = true                             -- Show line numbers
+vim.opt.showmatch = true                          -- Highlight matching parenthesis
+vim.opt.splitright = true                         -- Split windows right to the current windows
+vim.opt.splitbelow = true                         -- Split windows below to the current windows
+vim.opt.autowrite = true                          -- Automatically save before :next, :make etc.
+vim.opt.autochdir = true                          -- Change CWD when I open a file
 
-vim.opt.mouse = 'a'                -- Enable mouse support
-vim.opt.clipboard = 'unnamedplus'  -- Copy/paste to system clipboard
-vim.opt.swapfile = false           -- Don't use swapfile
-vim.opt.ignorecase = true          -- Search case insensitive...
-vim.opt.smartcase = true           -- ... but not it begins with upper case 
-vim.opt.completeopt = 'menuone,noinsert,noselect'  -- Autocomplete options
+vim.opt.mouse = 'a'                               -- Enable mouse support
+vim.opt.clipboard = 'unnamedplus'                 -- Copy/paste to system clipboard
+vim.opt.swapfile = false                          -- Don't use swapfile
+vim.opt.ignorecase = true                         -- Search case insensitive...
+vim.opt.smartcase = true                          -- ... but not it begins with upper case
+vim.opt.completeopt = 'menuone,noinsert,noselect' -- Autocomplete options
 
 vim.opt.undofile = true
 vim.opt.undodir = vim.fn.stdpath("data") .. "undo"
 
 -- Indent Settings
 -- I'm in the Spaces camp (sorry Tabs folks), so I'm using a combination of
--- settings to insert spaces all the time. 
+-- settings to insert spaces all the time.
 vim.opt.expandtab = true  -- expand tabs into spaces
 vim.opt.shiftwidth = 2    -- number of spaces to use for each step of indent.
 vim.opt.tabstop = 2       -- number of spaces a TAB counts for
@@ -597,8 +629,8 @@ vim.keymap.set('n', '<Leader><space>', ':nohlsearch<CR>')
 
 -- Search mappings: These will make it so that going to the next one in a
 -- search will center on the line it's found in.
-vim.keymap.set('n', 'n', 'nzzzv', {noremap = true})
-vim.keymap.set('n', 'N', 'Nzzzv', {noremap = true})
+vim.keymap.set('n', 'n', 'nzzzv', { noremap = true })
+vim.keymap.set('n', 'N', 'Nzzzv', { noremap = true })
 
 -- Don't jump forward if I higlight and search for a word
 local function stay_star()
@@ -607,7 +639,7 @@ local function stay_star()
   vim.api.nvim_command(args)
   vim.fn.winrestview(sview)
 end
-vim.keymap.set('n', '*', stay_star, {noremap = true, silent = true})
+vim.keymap.set('n', '*', stay_star, { noremap = true, silent = true })
 
 -- We don't need this keymap, but here we are. If I do a ctrl-v and select
 -- lines vertically, insert stuff, they get lost for all lines if we use
@@ -619,7 +651,7 @@ vim.keymap.set('i', '<C-c>', '<ESC>')
 -- clipboard
 vim.keymap.set("x", "p", "\"_dP")
 
--- rename the word under the cursor 
+-- rename the word under the cursor
 vim.keymap.set("n", "<leader>rw", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 
 -- Better split switching
@@ -706,6 +738,10 @@ vim.keymap.set('n', '<leader>tf', ':TestFile -v<CR>', { noremap = true, silent =
 -- undotree
 vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
 
+-- go.nvim
+vim.keymap.set('n', '<leader>b', ':GoBuild<CR>')
+vim.keymap.set('n', '<leader>r', ':GoRun -F<CR>')
+
 -- telescope
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>gf', builtin.git_files, {})
@@ -768,16 +804,23 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', 'gd', "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
     vim.keymap.set('n', '<leader>v', "<cmd>vsplit | lua vim.lsp.buf.definition()<CR>", opts)
     vim.keymap.set('n', '<leader>s', "<cmd>belowright split | lua vim.lsp.buf.definition()<CR>", opts)
-
     vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
     vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
     vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
     vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
     vim.keymap.set('n', '<leader>cl', vim.lsp.codelens.run, opts)
     vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
-    vim.keymap.set({'n', 'v'}, '<leader>ca', vim.lsp.buf.code_action, opts)
+    vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, opts)
   end,
 })
+
+-- Trouble
+vim.keymap.set("n", "<leader>xx", "<cmd>TroubleToggle<cr>", { silent = true, noremap = true })
+vim.keymap.set("n", "<leader>xw", "<cmd>TroubleToggle workspace_diagnostics<cr>", { silent = true, noremap = true })
+vim.keymap.set("n", "<leader>xd", "<cmd>TroubleToggle document_diagnostics<cr>", { silent = true, noremap = true })
+vim.keymap.set("n", "<leader>xl", "<cmd>TroubleToggle loclist<cr>", { silent = true, noremap = true })
+vim.keymap.set("n", "<leader>xq", "<cmd>TroubleToggle quickfix<cr>", { silent = true, noremap = true })
+vim.keymap.set("n", "gR", "<cmd>TroubleToggle lsp_references<cr>", { silent = true, noremap = true })
 
 -- automatically resize all vim buffers if I resize the terminal window
 vim.api.nvim_command('autocmd VimResized * wincmd =')
