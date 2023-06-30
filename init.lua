@@ -730,16 +730,14 @@ vim.keymap.set('x', '<leader>go', ":<C-u> lua require('git.browse').open(true)<C
 vim.keymap.set('n', '<leader>n', ':NvimTreeToggle<CR>', { noremap = true })
 vim.keymap.set('n', '<leader>f', ':NvimTreeFindFile!<CR>', { noremap = true })
 
--- vim-test
-vim.keymap.set('n', '<leader>tt', ':TestNearest -v<CR>', { noremap = true, silent = true })
-vim.keymap.set('n', '<leader>tf', ':TestFile -v<CR>', { noremap = true, silent = true })
-
 -- undotree
 vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
 
 -- go.nvim
 vim.keymap.set('n', '<leader>b', ':GoBuild<CR>')
 vim.keymap.set('n', '<leader>r', ':GoRun -F<CR>')
+vim.keymap.set('n', '<leader>gv', ':GoAltV!<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>tt', ':GoAlt!<CR>', { noremap = true, silent = true })
 
 -- telescope
 local builtin = require('telescope.builtin')
