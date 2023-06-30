@@ -67,7 +67,7 @@ require("lazy").setup({
   {
     'dinhhuy258/git.nvim',
     config = function()
-      require("git").setup()
+      require('git').setup()
     end,
   },
 
@@ -556,6 +556,79 @@ require("lazy").setup({
       })
     end,
   },
+
+  {
+    'declancm/cinnamon.nvim',
+    config = function() require('cinnamon').setup() end
+  },
+
+  {
+    "gbprod/substitute.nvim",
+    config = function()
+      require("substitute").setup({
+        on_substitute = nil,
+        yank_substituted_text = false,
+        highlight_substituted_text = {
+          enabled = true,
+          timer = 500,
+        },
+        range = {
+          prefix = "s",
+          prompt_current_text = false,
+          confirm = false,
+          complete_word = false,
+          motion1 = false,
+          motion2 = false,
+          suffix = "",
+        },
+        exchange = {
+          motion = false,
+          use_esc_to_cancel = true,
+        }
+      })
+    end
+  },
+
+  {
+    "gbprod/yanky.nvim",
+    config = function()
+      require("yanky").setup({
+        ring = {
+          history_length = 100,
+          storage = "shada",
+          sync_with_numbered_registers = true,
+          cancel_event = "update",
+        },
+        picker = {
+          select = {
+            action = nil, -- nil to use default put action
+          },
+          telescope = {
+            mappings = nil, -- nil to use default mappings
+          },
+        },
+        system_clipboard = {
+          sync_with_ring = true,
+        },
+        highlight = {
+          on_put = true,
+          on_yank = true,
+          timer = 500,
+        },
+        preserve_cursor_position = {
+          enabled = true,
+        },
+      })
+    end
+  },
+  {
+    "gbprod/cutlass.nvim",
+    config = function()
+      require("cutlass").setup({
+        cut_key = "m",
+      })
+    end
+  },
 })
 
 ----------------
@@ -720,11 +793,6 @@ vim.api.nvim_create_autocmd("BufWinEnter", {
 vim.api.nvim_create_autocmd("TermOpen", {
   command = [[setlocal nonumber norelativenumber]]
 })
-
--- git.nvim
-vim.keymap.set('n', '<leader>gb', '<CMD>lua require("git.blame").blame()<CR>')
-vim.keymap.set('n', '<leader>go', "<CMD>lua require('git.browse').open(false)<CR>")
-vim.keymap.set('x', '<leader>go', ":<C-u> lua require('git.browse').open(true)<CR>")
 
 -- File-tree mappings
 vim.keymap.set('n', '<leader>n', ':NvimTreeToggle<CR>', { noremap = true })
