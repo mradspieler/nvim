@@ -223,8 +223,7 @@ require("lazy").setup({
       require("navigator").setup({
         mason = true,
         lsp = {
-          tsserver = { cmd = { '/home/user/.local/share/nvim/mason/bin/tsserver' } },
-          gopls = { cmd = { '/Users/Q293643/.local/share/nvim/mason/bin/gopls' } }
+          gopls = { cmd = { os.getenv("HOME") .. '/.local/share/nvim/mason/bin/gopls' } }
         }
       })
     end,
