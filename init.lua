@@ -150,7 +150,8 @@ require("lazy").setup({
     dependencies = {
       -- LSP Support
       { 'neovim/nvim-lspconfig' }, -- Required
-      {                            -- Optional
+      {
+        -- Optional
         'williamboman/mason.nvim',
         build = function()
           pcall(vim.cmd, 'MasonUpdate')
@@ -386,7 +387,6 @@ require("lazy").setup({
         },
         highlight = {
           enable = true,
-
           -- Disable slow treesitter highlight for large files
           disable = function(lang, buf)
             local max_filesize = 100 * 1024 -- 100 KB
@@ -395,7 +395,6 @@ require("lazy").setup({
               return true
             end
           end,
-
           -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
           -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
           -- Using this option may slow down your editor, and you may see some duplicate highlights.
@@ -629,6 +628,31 @@ require("lazy").setup({
       })
     end
   },
+
+  -- {
+  --   "sourcegraph/cody.nvim",
+  --   config = function()
+  --     require("cody").setup({
+  --       accessToken = "",
+  --       -- OPTIONAL:
+  --       -- url = "https://your-sourcegraph-instance.com"
+  --     })
+  --   end
+  -- },
+
+  -- Lazy
+  {
+    "jackMort/ChatGPT.nvim",
+    event = "VeryLazy",
+    config = function()
+      require("chatgpt").setup()
+    end,
+    dependencies = {
+      "MunifTanjim/nui.nvim",
+      "nvim-lua/plenary.nvim",
+      "nvim-telescope/telescope.nvim"
+    }
+  }
 })
 
 ----------------
@@ -825,7 +849,8 @@ vim.keymap.set('n', '<leader>dn', vim.diagnostic.goto_next)
 vim.keymap.set('n', '<leader>ds', vim.diagnostic.setqflist)
 
 -- disable diagnostics, I didn't like them
-vim.lsp.handlers["textDocument/publishDiagnostics"] = function() end
+vim.lsp.handlers["textDocument/publishDiagnostics"] = function()
+end
 
 -- Go uses gofmt, which uses tabs for indentation and spaces for aligment.
 -- Hence override our indentation rules.
