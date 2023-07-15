@@ -645,7 +645,10 @@ require("lazy").setup({
     "jackMort/ChatGPT.nvim",
     event = "VeryLazy",
     config = function()
-      require("chatgpt").setup()
+      require("chatgpt").setup({
+        predefined_chat_gpt_prompts =
+        "https://raw.githubusercontent.com/mradspieler/awesome-chatgpt-prompts/main/prompts.csv",
+      })
     end,
     dependencies = {
       "MunifTanjim/nui.nvim",
