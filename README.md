@@ -3,12 +3,12 @@
 ## File-tree mappings
 | Command | Description |
 | --- | --- |
-|<leader>n|NvimTreeToggle|
+|\<leader\>n|NvimTreeToggle|
 
 ## undotree
 | Command | Description |
 | --- | --- |
-|<leader>u|UndotreeToggle|
+|\<leader\>u|UndotreeToggle|
 
 ## go.nvim
 | Command | Description |
