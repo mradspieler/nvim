@@ -62,7 +62,7 @@
 |\<leader\>xq|TroubleToggle quickfix|
 |gR|TroubleToggle lsp_references|
 
-
+#### General
 | Command | Description |
 | --- | --- |
 |gJ|Join the object under cursor|
