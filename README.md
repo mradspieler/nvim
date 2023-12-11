@@ -1,16 +1,16 @@
 # nvim
 
 -- File-tree mappings
-<leader>n	NvimTreeToggle
+|<leader>n|NvimTreeToggle|
 
 -- undotree
-<leader>u	UndotreeToggle
+|<leader>u|UndotreeToggle|
 
 -- go.nvim
-<leader>b	:GoBuild
-<leader>r	:GoRun
-<leader>gv	:GoAltV
-<leader>tt	:GoAlt
+|<leader>b|:GoBuild|
+|<leader>r|:GoRun|
+|<leader>gv|:GoAltV|
+|<leader>tt|:GoAlt|
 
 -- telescope
 <leader>gf	builtin.git_files
