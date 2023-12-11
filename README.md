@@ -1,18 +1,24 @@
 # nvim
 
--- File-tree mappings
+## File-tree mappings
+| Command | Description |
+| --- | --- |
 |<leader>n|NvimTreeToggle|
 
--- undotree
+## undotree
+| Command | Description |
+| --- | --- |
 |<leader>u|UndotreeToggle|
 
--- go.nvim
+## go.nvim
+| Command | Description |
+| --- | --- |
 |<leader>b|:GoBuild|
 |<leader>r|:GoRun|
 |<leader>gv|:GoAltV|
 |<leader>tt|:GoAlt|
 
--- telescope
+## telescope
 <leader>gf	builtin.git_files
 <leader>ff	builtin.find_files
 <leader>ld	builtin.lsp_document_symbols
@@ -23,13 +29,13 @@
 <leader>fh	builtin.command_history
 <leader>fe	:Telescope file_browser
 
--- diagnostics
+## diagnostics
 <leader>do	vim.diagnostic.open_float
 <leader>dp	vim.diagnostic.goto_prev
 <leader>dn	vim.diagnostic.goto_next
 <leader>ds	 vim.diagnostic.setqflist
 
--- LSP
+## LSP
 gd	definition()
 <leader>v	vsplit | definition()
 <leader>s	belowright split | definition()
@@ -41,7 +47,7 @@ gi	implementation
 <leader>rn	rename
 <leader>ca	code_action
 
--- Trouble
+## Trouble
 <leader>xx	TroubleToggle
 <leader>xw	TroubleToggle workspace_diagnostics
 <leader>xd	TroubleToggle document_diagnostics
