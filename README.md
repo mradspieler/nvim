@@ -1,22 +1,21 @@
-# nvim
-
-## File-tree mappings
+## nvim
+#### File-tree mappings
 | Command | Description |
 | --- | --- |
 |\<leader\>n|NvimTreeToggle|
 
-## undotree
+#### undotree
 | Command | Description |
 | --- | --- |
 |\<leader\>u|UndotreeToggle|
 
-## go.nvim
+#### go.nvim
 | Command | Description |
 | --- | --- |
-|<leader>b|:GoBuild|
-|<leader>r|:GoRun|
-|<leader>gv|:GoAltV|
-|<leader>tt|:GoAlt|
+|\<leader\>b|:GoBuild|
+|\<leader\>r|:GoRun|
+|\<leader\>gv|:GoAltV|
+|\<leader\>tt|:GoAlt|
 
 ## telescope
 <leader>gf	builtin.git_files
