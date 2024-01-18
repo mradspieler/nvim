@@ -146,75 +146,98 @@ require("lazy").setup({
   -- programming languages / debugger
   {
     'VonHeikemen/lsp-zero.nvim',
-    branch = 'v2.x',
+    branch = 'v3.x',
     dependencies = {
-      -- LSP Support
-      { 'neovim/nvim-lspconfig' }, -- Required
-      {
-        -- Optional
-        'williamboman/mason.nvim',
-        build = function()
-          pcall(vim.cmd, 'MasonUpdate')
-        end,
-      },
-      { 'williamboman/mason-lspconfig.nvim' }, -- Optional
+      { 'neovim/nvim-lspconfig' },
+      { 'williamboman/mason.nvim' },
+      { 'williamboman/mason-lspconfig.nvim' },
 
       -- Autocompletion
-      { 'hrsh7th/nvim-cmp' },     -- Required
-      { 'hrsh7th/cmp-nvim-lsp' }, -- Required
-      { 'L3MON4D3/LuaSnip' },     -- Required
+      { 'hrsh7th/nvim-cmp' },
+      { 'hrsh7th/cmp-nvim-lsp' },
+      {
+        "L3MON4D3/LuaSnip",
+        dependencies = { "rafamadriz/friendly-snippets" },
+        config = function()
+          require("luasnip.loaders.from_vscode").lazy_load()
+        end
+      },
     },
     config = function()
-      local lsp = require('lsp-zero').preset({})
+      local lsp_zero = require('lsp-zero')
 
-      lsp.on_attach(function(client, bufnr)
-        lsp.default_keymaps({ buffer = bufnr })
+      lsp_zero.on_attach(function(client, bufnr)
+        -- see :help lsp-zero-keybindings
+        -- to learn the available actions
+        lsp_zero.default_keymaps({ buffer = bufnr })
       end)
 
-      -- (Optional) Configure lua language server for neovim
-      require('lspconfig').lua_ls.setup(lsp.nvim_lua_ls())
-      require('lspconfig').gopls.setup({
-        capabilities = capabilities,
-        flags = { debounce_text_changes = 200 },
-        settings = {
-          gopls = {
-            usePlaceholders = true,
-            gofumpt = true,
-            analyses = {
-              nilness = true,
-              unusedparams = true,
-              unusedwrite = true,
-              useany = true,
-            },
-            codelenses = {
-              gc_details = false,
-              generate = true,
-              regenerate_cgo = true,
-              run_govulncheck = true,
-              test = true,
-              tidy = true,
-              upgrade_dependency = true,
-              vendor = true,
-            },
-            experimentalPostfixCompletions = true,
-            completeUnimported = true,
-            staticcheck = true,
-            directoryFilters = { "-.git", "-node_modules" },
-            semanticTokens = true,
-            hints = {
-              assignVariableTypes = true,
-              compositeLiteralFields = true,
-              compositeLiteralTypes = true,
-              constantValues = true,
-              functionTypeParameters = true,
-              parameterNames = true,
-              rangeVariableTypes = true,
-            },
-          },
-        },
+      --- if you want to know more about lsp-zero and mason.nvim
+      --- read this: https://github.com/VonHeikemen/lsp-zero.nvim/blob/v3.x/doc/md/guides/integrate-with-mason-nvim.md
+      require('mason').setup({})
+      require('mason-lspconfig').setup({
+        ensure_installed = {},
+        handlers = {
+          lsp_zero.default_setup,
+          lua_ls = function()
+            local lua_opts = lsp_zero.nvim_lua_ls()
+            require('lspconfig').lua_ls.setup(lua_opts)
+          end,
+          gopls = function()
+            require('lspconfig').gopls.setup({
+              flags = { debounce_text_changes = 200 },
+              settings = {
+                gopls = {
+                  usePlaceholders = true,
+                  gofumpt = true,
+                  analyses = {
+                    nilness = true,
+                    unusedparams = true,
+                    unusedwrite = true,
+                    useany = true,
+                  },
+                  codelenses = {
+                    gc_details = false,
+                    generate = true,
+                    regenerate_cgo = true,
+                    run_govulncheck = true,
+                    test = true,
+                    tidy = true,
+                    upgrade_dependency = true,
+                    vendor = true,
+                  },
+                  experimentalPostfixCompletions = true,
+                  completeUnimported = true,
+                  staticcheck = true,
+                  directoryFilters = { "-.git", "-node_modules" },
+                  semanticTokens = true,
+                  hints = {
+                    assignVariableTypes = true,
+                    compositeLiteralFields = true,
+                    compositeLiteralTypes = true,
+                    constantValues = true,
+                    functionTypeParameters = true,
+                    parameterNames = true,
+                    rangeVariableTypes = true,
+                  },
+                },
+              },
+            })
+          end,
+        }
       })
 
-      lsp.setup()
+      local cmp = require('cmp')
+      local cmp_format = lsp_zero.cmp_format()
+
+      cmp.setup({
+        formatting = cmp_format,
+        mapping = cmp.mapping.preset.insert({
+          -- scroll up and down the documentation window
+          ['<C-u>'] = cmp.mapping.scroll_docs(-4),
+          ['<C-d>'] = cmp.mapping.scroll_docs(4),
+        }),
+      })
     end,
   },
 
@@ -303,7 +326,7 @@ require("lazy").setup({
   -- fuzzy finder framework
   {
     "nvim-telescope/telescope.nvim",
-    tag = '0.1.1',
+  --  tag = '0.1.4',
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
@@ -346,9 +369,9 @@ require("lazy").setup({
           "vimdoc",
           "javascript",
           "typescript",
-          "c",
+          --          "c",
           "lua",
-          "rust",
+          --          "rust",
           "go",
           "gomod",
           "diff",
@@ -358,12 +381,12 @@ require("lazy").setup({
           "sql",
           "svelte",
           "regex",
-          "python",
+          --          "python",
           "make",
           'markdown',
           'markdown_inline',
-          "kotlin",
-          "java",
+          --          "kotlin",
+          --          "java",
           "json",
           "jq",
           "html",
@@ -453,14 +476,6 @@ require("lazy").setup({
       require("nvim-autopairs").setup {
         check_ts = true,
       }
-    end
-  },
-
-  {
-    "L3MON4D3/LuaSnip",
-    dependencies = { "rafamadriz/friendly-snippets" },
-    config = function()
-      require("luasnip.loaders.from_vscode").lazy_load()
     end
   },
 
@@ -907,6 +922,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end,
 })
 
+
 -- Trouble
 vim.keymap.set("n", "<leader>xx", "<cmd>TroubleToggle<cr>", { silent = true, noremap = true })
 vim.keymap.set("n", "<leader>xw", "<cmd>TroubleToggle workspace_diagnostics<cr>", { silent = true, noremap = true })
@@ -917,3 +933,4 @@ vim.keymap.set("n", "gR", "<cmd>TroubleToggle lsp_references<cr>", { silent = tr
 
 -- automatically resize all vim buffers if I resize the terminal window
 vim.api.nvim_command('autocmd VimResized * wincmd =')
+vim.lsp.set_log_level("debug")
