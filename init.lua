@@ -65,10 +65,10 @@ require("lazy").setup({
 
   -- git
   {
-    'dinhhuy258/git.nvim',
-    config = function()
-      require('git').setup()
-    end,
+    'kdheepak/lazygit.nvim',
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+    },
   },
 
   {
@@ -176,12 +176,31 @@ require("lazy").setup({
       --- read this: https://github.com/VonHeikemen/lsp-zero.nvim/blob/v3.x/doc/md/guides/integrate-with-mason-nvim.md
       require('mason').setup({})
       require('mason-lspconfig').setup({
-        ensure_installed = {},
+        ensure_installed = { "gopls", "jsonls" },
         handlers = {
           lsp_zero.default_setup,
           lua_ls = function()
             local lua_opts = lsp_zero.nvim_lua_ls()
             require('lspconfig').lua_ls.setup(lua_opts)
+          end,
+          sqls = function()
+            require('lspconfig').sqls.setup {}
+          end,
+          jsonls = function()
+            require('lspconfig').jsonls.setup {}
+          end,
+          yamlls = function()
+            require('lspconfig').yamlls.setup {
+              settings = {
+                yaml = {
+                  schemas = {
+                    ["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*",
+                    ["../path/relative/to/file.yml"] = "/.github/workflows/*",
+                    ["/path/from/root/of/project"] = "/.github/workflows/*",
+                  },
+                },
+              }
+            }
           end,
           gopls = function()
             require('lspconfig').gopls.setup({
@@ -326,7 +345,7 @@ require("lazy").setup({
   -- fuzzy finder framework
   {
     "nvim-telescope/telescope.nvim",
-  --  tag = '0.1.4',
+    --  tag = '0.1.4',
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
@@ -379,7 +398,7 @@ require("lazy").setup({
           "bash",
           "toml",
           "sql",
-          "svelte",
+          -- "svelte",
           "regex",
           --          "python",
           "make",
@@ -388,7 +407,7 @@ require("lazy").setup({
           --          "kotlin",
           --          "java",
           "json",
-          "jq",
+          -- "jq",
           "html",
           "http",
           "gitcommit",
@@ -718,8 +737,8 @@ vim.g.mapleader = ','
 vim.keymap.set("n", "<leader>jq", "<cmd>:%!jq .<CR>")
 
 -- Fast saving
-vim.keymap.set('n', '<Leader>w', ':write!<CR>')
-vim.keymap.set('n', '<Leader>q', ':q!<CR>', { silent = true })
+vim.keymap.set('n', '<leader>w', ':write!<CR>')
+vim.keymap.set('n', '<leader>q', ':q!<CR>', { silent = true })
 
 -- Some useful quickfix shortcuts for quickfix
 vim.keymap.set('n', '<C-n>', '<cmd>cnext<CR>zz')
@@ -856,7 +875,7 @@ vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
 vim.keymap.set('n', '<leader>ld', builtin.lsp_document_symbols, {})
 vim.keymap.set('n', '<leader>td', builtin.diagnostics, {})
 vim.keymap.set('n', '<leader>gs', builtin.grep_string, {})
-vim.keymap.set('n', '<leader>gg', builtin.live_grep, {})
+vim.keymap.set('n', '<leader>lg', builtin.live_grep, {})
 vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
 vim.keymap.set('n', '<leader>fh', builtin.command_history, {})
 
@@ -922,7 +941,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end,
 })
 
-
 -- Trouble
 vim.keymap.set("n", "<leader>xx", "<cmd>TroubleToggle<cr>", { silent = true, noremap = true })
 vim.keymap.set("n", "<leader>xw", "<cmd>TroubleToggle workspace_diagnostics<cr>", { silent = true, noremap = true })
@@ -933,4 +951,4 @@ vim.keymap.set("n", "gR", "<cmd>TroubleToggle lsp_references<cr>", { silent = tr
 
 -- automatically resize all vim buffers if I resize the terminal window
 vim.api.nvim_command('autocmd VimResized * wincmd =')
-vim.lsp.set_log_level("debug")
+-- vim.lsp.set_log_level("debug")
