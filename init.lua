@@ -863,10 +863,10 @@ vim.keymap.set('n', '<leader>f', ':NvimTreeFindFile!<CR>', { noremap = true })
 vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
 
 -- go.nvim
-vim.keymap.set('n', '<leader>b', ':GoBuild<CR>')
-vim.keymap.set('n', '<leader>r', ':GoRun -F<CR>')
-vim.keymap.set('n', '<leader>gv', ':GoAltV!<CR>', { noremap = true, silent = true })
-vim.keymap.set('n', '<leader>tt', ':GoAlt!<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>b', ':write!<CR>:GoBuild<CR>')
+vim.keymap.set('n', '<leader>r', ':write!<CR>:GoRun -F<CR>')
+vim.keymap.set('n', '<leader>gv', ':write!<CR>:GoAltV!<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>tt', ':write!<CR>:GoAlt!<CR>', { noremap = true, silent = true })
 
 -- telescope
 local builtin = require('telescope.builtin')
