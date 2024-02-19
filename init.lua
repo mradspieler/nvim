@@ -379,6 +379,7 @@ require("lazy").setup({
     'nvim-treesitter/nvim-treesitter',
     dependencies = {
       'nvim-treesitter/nvim-treesitter-textobjects',
+      'nvim-treesitter/nvim-treesitter-context',
     },
     build = ":TSUpdate",
     config = function()
@@ -764,6 +765,9 @@ vim.keymap.set('n', '<Leader><space>', ':nohlsearch<CR>')
 -- search will center on the line it's found in.
 vim.keymap.set('n', 'n', 'nzzzv', { noremap = true })
 vim.keymap.set('n', 'N', 'Nzzzv', { noremap = true })
+
+-- setup mapping to call :LazyGit
+vim.keymap.set('n', '<leader>aa', ':LazyGit<CR>')
 
 -- Don't jump forward if I higlight and search for a word
 local function stay_star()
