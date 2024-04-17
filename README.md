@@ -80,7 +80,7 @@
 |\<leader\>ar|Review code|
 |\<leader\>aR|Refactor code|
 |\<leader\>an|Better Naming|
-|\<leader\>av|pen in vertical split - Toggle|
+|\<leader\>av|Open in vertical split - Toggle|
 |\<leader\>ax|Inline chat|
 |\<leader\>ai|Ask input|
 |\<leader\>am|Generate commit message for all changes|
