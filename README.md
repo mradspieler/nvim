@@ -69,3 +69,24 @@
 |gS|Split the object under cursor|
 |gcc|Toggles the current line using linewise comment|
 |gbc|Toggles the current line using blockwise comment|
+
+#### Copilot
+| Command | Description |
+| --- | --- |
+|\<leader\>ah|Help actions|
+|\<leader\>ap|Prompt actions|
+|\<leader\>ae|Explain code|
+|\<leader\>at|Generate tests|
+|\<leader\>ar|Review code|
+|\<leader\>aR|Refactor code|
+|\<leader\>an|Better Naming|
+|\<leader\>av|pen in vertical split - Toggle|
+|\<leader\>ax|Inline chat|
+|\<leader\>ai|Ask input|
+|\<leader\>am|Generate commit message for all changes|
+|\<leader\>aM|Generate commit message for staged changes|
+|\<leader\>aq|Quick chat|
+|\<leader\>al|Clear buffer and chat history|
+
+![grafik](https://github.com/mradspieler/nvim/assets/6131122/f418c27d-1be2-4bbb-9fa7-1633c864bb7a)
+
