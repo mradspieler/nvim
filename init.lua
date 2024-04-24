@@ -727,6 +727,36 @@ require("lazy").setup({
   --   "github/copilot.vim",
   -- },
 
+  -- {
+  --   "jackMort/ChatGPT.nvim",
+  --   event = "VeryLazy",
+  --   config = function()
+  --     require("chatgpt").setup({
+  --       predefined_chat_gpt_prompts =
+  --       "https://raw.githubusercontent.com/mradspieler/awesome-chatgpt-prompts/main/prompts.csv",
+  --     })
+  --   end,
+  --   dependencies = {
+  --     "MunifTanjim/nui.nvim",
+  --     "nvim-lua/plenary.nvim",
+  --     "nvim-telescope/telescope.nvim"
+  --   }
+  -- }
+
+  -- {
+  --   "mradspieler/Mistral.nvim",
+  --   event = "VeryLazy",
+  --   config = function()
+  --     require("chatgpt").setup()
+  --   end,
+  --   dependencies = {
+  --     "MunifTanjim/nui.nvim",
+  --     "nvim-lua/plenary.nvim",
+  --     "nvim-telescope/telescope.nvim"
+  --   }
+  -- }
+
+
   {
     "ibhagwan/fzf-lua",
     -- optional for icon support
@@ -938,53 +968,6 @@ require("lazy").setup({
       { "<leader>av", "<cmd>CopilotChatToggle<cr>",        desc = "CopilotChat - Toggle" },
     },
   },
-
-  -- {
-  --   "CopilotC-Nvim/CopilotChat.nvim",
-  --   branch = "canary",
-  --   dependencies = {
-  --     { "github/copilot.vim" },            -- zbirenbaum/copilot.lua
-  --     { "nvim-lua/plenary.nvim" },         -- for curl, log wrapper
-  --     { "nvim-telescope/telescope.nvim" }, -- Use telescope for help actions
-  --   },
-  --   opts = {
-  --     debug = true, -- Enable debugging
-  --     -- See Configuration section for rest
-  --     window = {
-  --       layout = 'float', -- 'vertical', 'horizontal', 'float'
-  --     },
-  --   },
-  --   -- See Commands section for default commands if you want to lazy load on them
-  -- },
-
-  -- {
-  --   "jackMort/ChatGPT.nvim",
-  --   event = "VeryLazy",
-  --   config = function()
-  --     require("chatgpt").setup({
-  --       predefined_chat_gpt_prompts =
-  --       "https://raw.githubusercontent.com/mradspieler/awesome-chatgpt-prompts/main/prompts.csv",
-  --     })
-  --   end,
-  --   dependencies = {
-  --     "MunifTanjim/nui.nvim",
-  --     "nvim-lua/plenary.nvim",
-  --     "nvim-telescope/telescope.nvim"
-  --   }
-  -- }
-
-  -- {
-  --   "mradspieler/Mistral.nvim",
-  --   event = "VeryLazy",
-  --   config = function()
-  --     require("chatgpt").setup()
-  --   end,
-  --   dependencies = {
-  --     "MunifTanjim/nui.nvim",
-  --     "nvim-lua/plenary.nvim",
-  --     "nvim-telescope/telescope.nvim"
-  --   }
-  -- }
 })
 
 ----------------
