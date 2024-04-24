@@ -1,4 +1,23 @@
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+local prompts = {
+  -- Code related prompts
+  Explain = "Please explain how the following code works.",
+  Review = "Please review the following code and provide suggestions for improvement.",
+  Tests = "Please explain how the selected code works, then generate unit tests for it.",
+  Refactor = "Please refactor the following code to improve its clarity and readability.",
+  FixCode = "Please fix the following code to make it work as intended.",
+  FixError = "Please explain the error in the following text and provide a solution.",
+  BetterNamings = "Please provide better names for the following variables and functions.",
+  Documentation = "Please provide documentation for the following code.",
+  SwaggerApiDocs = "Please provide documentation for the following API using Swagger.",
+  SwaggerJsDocs = "Please write JSDoc for the following API using Swagger.",
+  -- Text related prompts
+  Summarize = "Please summarize the following text.",
+  Spelling = "Please correct any grammar and spelling errors in the following text.",
+  Wording = "Please improve the grammar and wording of the following text.",
+  Concise = "Please rewrite the following text to make it more concise.",
+}
+
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
     "git",
@@ -75,7 +94,8 @@ require("lazy").setup({
     'lewis6991/gitsigns.nvim',
     -- tag = 'release' -- To use the latest release (do not use this if you run Neovim nightly or dev builds!)
     config = function()
-      require("gitsigns").setup()
+      require("gitsigns").setup({
+      })
     end,
   },
 
@@ -130,18 +150,13 @@ require("lazy").setup({
   },
 
   -- markdown
-  {
-    "iamcco/markdown-preview.nvim",
-    dependencies = {
-      "zhaozg/vim-diagram",
-      "aklt/plantuml-syntax",
-    },
-    build = function()
-      vim.fn["mkdp#util#install"]()
-    end,
-    ft = "markdown",
-    cmd = { "MarkdownPreview" },
-  },
+  -- {
+  --   "iamcco/markdown-preview.nvim",
+  --   cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+  --   ft = { "markdown" },
+  --   build = function() vim.fn["mkdp#util#install"]() end,
+  --   lazy = false,
+  -- },
 
   -- programming languages / debugger
   {
@@ -328,7 +343,8 @@ require("lazy").setup({
   },
 
   {
-    "bennypowers/splitjoin.nvim",
+    'bennypowers/splitjoin.nvim',
+    lazy = false,
     keys = {
       { 'gJ', function() require 'splitjoin'.join() end,  desc = 'Join the object under cursor' },
       { 'gS', function() require 'splitjoin'.split() end, desc = 'Split the object under cursor' },
@@ -399,7 +415,7 @@ require("lazy").setup({
           "bash",
           "toml",
           "sql",
-          -- "svelte",
+          --          "svelte",
           "regex",
           --          "python",
           "make",
@@ -408,7 +424,7 @@ require("lazy").setup({
           --          "kotlin",
           --          "java",
           "json",
-          -- "jq",
+          --          "jq",
           "html",
           "http",
           "gitcommit",
@@ -655,6 +671,7 @@ require("lazy").setup({
       })
     end
   },
+
   {
     "gbprod/cutlass.nvim",
     config = function()
@@ -665,32 +682,309 @@ require("lazy").setup({
   },
 
   -- {
-  --   "sourcegraph/cody.nvim",
+  --   "David-Kunz/gen.nvim",
+  --   opts = {
+  --     model = "mistral",     -- The default model to use.
+  --     host = "localhost",    -- The host running the Ollama service.
+  --     port = "1337",         -- The port on which the Ollama service is listening.
+  --     quit_map = "q",        -- set keymap for close the response window
+  --     retry_map = "<c-r>",   -- set keymap to re-send the current prompt
+  --     command = function(options)
+  --       local body = { model = options.model, stream = true }
+  --       return "curl --silent --no-buffer -X POST http://" .. options.host .. ":" .. options.port .. "/api/chat -d $body"
+  --     end,
+  --     -- The command for the Ollama service. You can use placeholders $prompt, $model and $body (shellescaped).
+  --     -- This can also be a command string.
+  --     -- The executed command must return a JSON object with { response, context }
+  --     -- (context property is optional).
+  --     -- list_models = '<omitted lua function>', -- Retrieves a list of model names
+  --     display_mode = "float",   -- The display mode. Can be "float" or "split".
+  --     show_prompt = false,      -- Shows the prompt submitted to Ollama.
+  --     show_model = false,       -- Displays which model you are using at the beginning of your chat session.
+  --     no_auto_close = false,    -- Never closes the window automatically.
+  --     debug = false             -- Prints errors and the command which is run.
+  --   },
   --   config = function()
-  --     require("cody").setup({
-  --       accessToken = "",
-  --       -- OPTIONAL:
-  --       -- url = "https://your-sourcegraph-instance.com"
+  --     require('gen').setup({
+  --       -- same as above
   --     })
   --   end
   -- },
 
-  -- Lazy
+  -- {
+  --   -- "sourcegraph/sg.nvim",
+  --   "mradspieler/sg.nvim",
+  --   dependencies = {
+  --     "nvim-lua/plenary.nvim",
+  --     "nvim-telescope/telescope.nvim",
+  --   },
+  --   config = function()
+  --     require("sg").setup({})
+  --   end
+  -- },
+
+  -- {
+  --   "github/copilot.vim",
+  -- },
+
   {
-    "jackMort/ChatGPT.nvim",
-    event = "VeryLazy",
+    "ibhagwan/fzf-lua",
+    -- optional for icon support
+    dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
-      require("chatgpt").setup({
-        predefined_chat_gpt_prompts =
-        "https://raw.githubusercontent.com/mradspieler/awesome-chatgpt-prompts/main/prompts.csv",
+      -- calling `setup` is optional for customization
+      require("fzf-lua").setup({})
+    end
+  },
+
+  {
+    "CopilotC-Nvim/CopilotChat.nvim",
+    -- version = "v2.4.0",
+    branch = "canary", -- Use the canary branch if you want to test the latest features but it might be unstable
+    -- Do not use branch and version together, either use branch or version
+    dependencies = {
+      { "nvim-lua/plenary.nvim" },
+      { "github/copilot.vim" },
+    },
+    opts = {
+      prompts = prompts,
+      mappings = {
+        -- Use tab for completion
+        complete = {
+          detail = "Use @<Tab> or /<Tab> for options.",
+          insert = "<Tab>",
+        },
+        -- Close the chat
+        close = {
+          normal = "q",
+          insert = "<C-c>",
+        },
+        -- Reset the chat buffer
+        reset = {
+          normal = "<C-l>",
+          insert = "<C-l>",
+        },
+        -- Submit the prompt to Copilot
+        submit_prompt = {
+          normal = "<CR>",
+          insert = "<C-CR>",
+        },
+        -- Accept the diff
+        accept_diff = {
+          normal = "<C-y>",
+          insert = "<C-y>",
+        },
+        -- Yank the diff in the response to register
+        yank_diff = {
+          normal = "gmy",
+        },
+        -- Show the diff
+        show_diff = {
+          normal = "gmd",
+        },
+        -- Show the prompt
+        show_system_prompt = {
+          normal = "gmp",
+        },
+        -- Show the user selection
+        show_user_selection = {
+          normal = "gms",
+        },
+      },
+    },
+    config = function(_, opts)
+      local chat = require("CopilotChat")
+      local select = require("CopilotChat.select")
+      -- Use unnamed register for the selection
+      opts.selection = select.unnamed
+
+      -- Override the git prompts message
+      opts.prompts.Commit = {
+        prompt = "Write commit message for the change with commitizen convention",
+        selection = select.gitdiff,
+      }
+      opts.prompts.CommitStaged = {
+        prompt = "Write commit message for the change with commitizen convention",
+        selection = function(source)
+          return select.gitdiff(source, true)
+        end,
+      }
+
+      chat.setup(opts)
+
+      vim.api.nvim_create_user_command("CopilotChatVisual", function(args)
+        chat.ask(args.args, { selection = select.visual })
+      end, { nargs = "*", range = true })
+
+      -- Inline chat with Copilot
+      vim.api.nvim_create_user_command("CopilotChatInline", function(args)
+        chat.ask(args.args, {
+          selection = select.visual,
+          window = {
+            layout = "float",
+            relative = "cursor",
+            width = 1,
+            height = 0.4,
+            row = 1,
+          },
+        })
+      end, { nargs = "*", range = true })
+
+      -- Restore CopilotChatBuffer
+      vim.api.nvim_create_user_command("CopilotChatBuffer", function(args)
+        chat.ask(args.args, { selection = select.buffer })
+      end, { nargs = "*", range = true })
+
+      -- Custom buffer for CopilotChat
+      vim.api.nvim_create_autocmd("BufEnter", {
+        pattern = "copilot-*",
+        callback = function()
+          vim.opt_local.relativenumber = true
+          vim.opt_local.number = true
+
+          -- Get current filetype and set it to markdown if the current filetype is copilot-chat
+          local ft = vim.bo.filetype
+          if ft == "copilot-chat" then
+            vim.bo.filetype = "markdown"
+          end
+        end,
       })
     end,
-    dependencies = {
-      "MunifTanjim/nui.nvim",
-      "nvim-lua/plenary.nvim",
-      "nvim-telescope/telescope.nvim"
-    }
-  }
+    event = "VeryLazy",
+    keys = {
+      -- Show help actions
+      {
+        "<leader>ah",
+        function()
+          local actions = require("CopilotChat.actions")
+          require("CopilotChat.integrations.fzflua").pick(actions.help_actions())
+        end,
+        desc = "CopilotChat - Help actions",
+      },
+      -- Show prompts actions
+      {
+        "<leader>ap",
+        function()
+          local actions = require("CopilotChat.actions")
+          require("CopilotChat.integrations.fzflua").pick(actions.prompt_actions())
+        end,
+        desc = "CopilotChat - Prompt actions",
+      },
+      {
+        "<leader>ap",
+        ":lua require('CopilotChat.integrations.fzflua').pick(require('CopilotChat.actions').prompt_actions({selection = require('CopilotChat.select').visual}))<CR>",
+        mode = "x",
+        desc = "CopilotChat - Prompt actions",
+      },
+      -- Code related commands
+      { "<leader>ae", "<cmd>CopilotChatExplain<cr>",       desc = "CopilotChat - Explain code" },
+      { "<leader>at", "<cmd>CopilotChatTests<cr>",         desc = "CopilotChat - Generate tests" },
+      { "<leader>ar", "<cmd>CopilotChatReview<cr>",        desc = "CopilotChat - Review code" },
+      { "<leader>aR", "<cmd>CopilotChatRefactor<cr>",      desc = "CopilotChat - Refactor code" },
+      { "<leader>an", "<cmd>CopilotChatBetterNamings<cr>", desc = "CopilotChat - Better Naming" },
+      -- Chat with Copilot in visual mode
+      {
+        "<leader>av",
+        ":CopilotChatVisual",
+        mode = "x",
+        desc = "CopilotChat - Open in vertical split",
+      },
+      {
+        "<leader>ax",
+        ":CopilotChatInline<cr>",
+        mode = "x",
+        desc = "CopilotChat - Inline chat",
+      },
+      -- Custom input for CopilotChat
+      {
+        "<leader>ai",
+        function()
+          local input = vim.fn.input("Ask Copilot: ")
+          if input ~= "" then
+            vim.cmd("CopilotChat " .. input)
+          end
+        end,
+        desc = "CopilotChat - Ask input",
+      },
+      -- Generate commit message based on the git diff
+      {
+        "<leader>am",
+        "<cmd>CopilotChatCommit<cr>",
+        desc = "CopilotChat - Generate commit message for all changes",
+      },
+      {
+        "<leader>aM",
+        "<cmd>CopilotChatCommitStaged<cr>",
+        desc = "CopilotChat - Generate commit message for staged changes",
+      },
+      -- Quick chat with Copilot
+      {
+        "<leader>aq",
+        function()
+          local input = vim.fn.input("Quick Chat: ")
+          if input ~= "" then
+            vim.cmd("CopilotChatBuffer " .. input)
+          end
+        end,
+        desc = "CopilotChat - Quick chat",
+      },
+      -- Debug
+      { "<leader>ad", "<cmd>CopilotChatDebugInfo<cr>",     desc = "CopilotChat - Debug Info" },
+      -- Fix the issue with diagnostic
+      { "<leader>af", "<cmd>CopilotChatFixDiagnostic<cr>", desc = "CopilotChat - Fix Diagnostic" },
+      -- Clear buffer and chat history
+      { "<leader>al", "<cmd>CopilotChatReset<cr>",         desc = "CopilotChat - Clear buffer and chat history" },
+      -- Toggle Copilot Chat Vsplit
+      { "<leader>av", "<cmd>CopilotChatToggle<cr>",        desc = "CopilotChat - Toggle" },
+    },
+  },
+
+  -- {
+  --   "CopilotC-Nvim/CopilotChat.nvim",
+  --   branch = "canary",
+  --   dependencies = {
+  --     { "github/copilot.vim" },            -- zbirenbaum/copilot.lua
+  --     { "nvim-lua/plenary.nvim" },         -- for curl, log wrapper
+  --     { "nvim-telescope/telescope.nvim" }, -- Use telescope for help actions
+  --   },
+  --   opts = {
+  --     debug = true, -- Enable debugging
+  --     -- See Configuration section for rest
+  --     window = {
+  --       layout = 'float', -- 'vertical', 'horizontal', 'float'
+  --     },
+  --   },
+  --   -- See Commands section for default commands if you want to lazy load on them
+  -- },
+
+  -- {
+  --   "jackMort/ChatGPT.nvim",
+  --   event = "VeryLazy",
+  --   config = function()
+  --     require("chatgpt").setup({
+  --       predefined_chat_gpt_prompts =
+  --       "https://raw.githubusercontent.com/mradspieler/awesome-chatgpt-prompts/main/prompts.csv",
+  --     })
+  --   end,
+  --   dependencies = {
+  --     "MunifTanjim/nui.nvim",
+  --     "nvim-lua/plenary.nvim",
+  --     "nvim-telescope/telescope.nvim"
+  --   }
+  -- }
+
+  -- {
+  --   "mradspieler/Mistral.nvim",
+  --   event = "VeryLazy",
+  --   config = function()
+  --     require("chatgpt").setup()
+  --   end,
+  --   dependencies = {
+  --     "MunifTanjim/nui.nvim",
+  --     "nvim-lua/plenary.nvim",
+  --     "nvim-telescope/telescope.nvim"
+  --   }
+  -- }
 })
 
 ----------------
@@ -703,7 +997,7 @@ vim.g.loaded_netrwPlugin = 1
 
 vim.opt.termguicolors = true                      -- Enable 24-bit RGB colors
 
-vim.opt.number = true                             -- Show line numbers
+vim.opt.relativenumber = true                     -- Show line numbers
 vim.opt.showmatch = true                          -- Highlight matching parenthesis
 vim.opt.splitright = true                         -- Split windows right to the current windows
 vim.opt.splitbelow = true                         -- Split windows below to the current windows
@@ -734,6 +1028,10 @@ vim.opt.wrap = true
 -- i.e: <leader>w saves the current file
 vim.g.mapleader = ','
 
+
+-- global cwd
+vim.g.mycwd = vim.fn.getcwd()
+
 -- json formatting
 vim.keymap.set("n", "<leader>jq", "<cmd>:%!jq .<CR>")
 
@@ -759,7 +1057,7 @@ vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 vim.keymap.set("n", "J", "mzJ`z")
 
 -- Remove search highlight
-vim.keymap.set('n', '<Leader><space>', ':nohlsearch<CR>')
+vim.keymap.set('n', '<leader><space>', ':nohlsearch<CR>')
 
 -- Search mappings: These will make it so that going to the next one in a
 -- search will center on the line it's found in.
@@ -768,6 +1066,10 @@ vim.keymap.set('n', 'N', 'Nzzzv', { noremap = true })
 
 -- setup mapping to call :LazyGit
 vim.keymap.set('n', '<leader>aa', ':LazyGit<CR>')
+
+-- setup mapping for gitsigns
+vim.keymap.set("n", "<leader>gp", ":Gitsigns preview_hunk<CR>", {})
+vim.keymap.set("n", "<leader>gb", ":Gitsigns blame_line<CR>", {})
 
 -- Don't jump forward if I higlight and search for a word
 local function stay_star()
@@ -875,7 +1177,8 @@ vim.keymap.set('n', '<leader>tt', ':write!<CR>:GoAlt!<CR>', { noremap = true, si
 -- telescope
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>gf', builtin.git_files, {})
-vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
+-- vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
+vim.keymap.set('n', '<leader>ff', function() builtin.find_files({ cwd = vim.g.mycwd }) end, {})
 vim.keymap.set('n', '<leader>ld', builtin.lsp_document_symbols, {})
 vim.keymap.set('n', '<leader>td', builtin.diagnostics, {})
 vim.keymap.set('n', '<leader>gs', builtin.grep_string, {})
@@ -956,3 +1259,23 @@ vim.keymap.set("n", "gR", "<cmd>TroubleToggle lsp_references<cr>", { silent = tr
 -- automatically resize all vim buffers if I resize the terminal window
 vim.api.nvim_command('autocmd VimResized * wincmd =')
 -- vim.lsp.set_log_level("debug")
+
+-- copilot config
+vim.keymap.set('i', '<C-j>', 'copilot#Accept("\\<CR>")', {
+  expr = true,
+  replace_keycodes = false
+})
+-- vim.keymap.set('n', '<leader>ae', '<cmd>CopilotChatExplain<cr>',
+--   { silent = true, noremap = true, desc = 'CopilotChat - Explain code' })
+-- vim.keymap.set('n', "<leader>at", "<cmd>CopilotChatTests<cr>",
+--   { silent = true, noremap = true, desc = "CopilotChat - Generate tests" })
+-- vim.keymap.set('n', "<leader>ar", "<cmd>CopilotChatReview<cr>",
+--   { silent = true, noremap = true, desc = "CopilotChat - Review code" })
+-- vim.keymap.set('n', "<leader>aR", "<cmd>CopilotChatRefactor<cr>",
+--   { silent = true, noremap = true, desc = "CopilotChat - Refactor code" })
+-- vim.keymap.set('n', "<leader>an", "<cmd>CopilotChatBetterNamings<cr>",
+--   { silent = true, noremap = true, desc = "CopilotChat - Better Naming" })
+
+vim.g.copilot_no_tab_map = true
+
+vim.api.nvim_set_hl(0, 'CopilotSuggestion', { fg = '#E3242B', ctermfg = 8 })
