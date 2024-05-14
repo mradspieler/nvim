@@ -87,6 +87,3 @@
 |\<leader\>aM|Generate commit message for staged changes|
 |\<leader\>aq|Quick chat|
 |\<leader\>al|Clear buffer and chat history|
-
-![grafik](https://github.com/mradspieler/nvim/assets/6131122/f418c27d-1be2-4bbb-9fa7-1633c864bb7a)
-
