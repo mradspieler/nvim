@@ -191,7 +191,7 @@ require("lazy").setup({
       --- read this: https://github.com/VonHeikemen/lsp-zero.nvim/blob/v3.x/doc/md/guides/integrate-with-mason-nvim.md
       require('mason').setup({})
       require('mason-lspconfig').setup({
-        ensure_installed = { "gopls", "jsonls" },
+        ensure_installed = { "gopls", "jsonls", "jdtls", "kotlin_language_server" },
         handlers = {
           lsp_zero.default_setup,
           lua_ls = function()
@@ -200,6 +200,9 @@ require("lazy").setup({
           end,
           sqls = function()
             require('lspconfig').sqls.setup {}
+          end,
+          jdtls = function()
+            require('lspconfig').jdtls.setup {}
           end,
           jsonls = function()
             require('lspconfig').jsonls.setup {}
@@ -223,13 +226,6 @@ require("lazy").setup({
               settings = {
                 gopls = {
                   usePlaceholders = true,
-                  gofumpt = true,
-                  analyses = {
-                    nilness = true,
-                    unusedparams = true,
-                    unusedwrite = true,
-                    useany = true,
-                  },
                   codelenses = {
                     gc_details = false,
                     generate = true,
@@ -268,8 +264,9 @@ require("lazy").setup({
         formatting = cmp_format,
         mapping = cmp.mapping.preset.insert({
           -- scroll up and down the documentation window
-          ['<C-u>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-d>'] = cmp.mapping.scroll_docs(4),
+          ['<C-Space>'] = cmp.mapping.complete(),
+          ['<C-e>'] = cmp.mapping.abort(),
+          ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
         }),
       })
     end,
@@ -317,7 +314,29 @@ require("lazy").setup({
 
   { "rcarriga/nvim-dap-ui",          requires = { "mfussenegger/nvim-dap" } },
 
-  -- use('mfussenegger/nvim-jdtls')
+
+  -- java section
+  {
+    'nvim-java/nvim-java',
+    dependencies = {
+      'nvim-java/lua-async-await',
+      'nvim-java/nvim-java-core',
+      'nvim-java/nvim-java-test',
+      'nvim-java/nvim-java-dap',
+      'MunifTanjim/nui.nvim',
+      'neovim/nvim-lspconfig',
+      'mfussenegger/nvim-dap',
+      {
+        'williamboman/mason.nvim',
+        opts = {
+          registries = {
+            'github:nvim-java/mason-registry',
+            'github:mason-org/mason-registry',
+          },
+        },
+      }
+    },
+  },
 
   {
     "folke/trouble.nvim",
@@ -349,6 +368,17 @@ require("lazy").setup({
       { 'gJ', function() require 'splitjoin'.join() end,  desc = 'Join the object under cursor' },
       { 'gS', function() require 'splitjoin'.split() end, desc = 'Split the object under cursor' },
     },
+  },
+ 
+  -- fzf lua extension
+    {
+    "ibhagwan/fzf-lua",
+    -- optional for icon support
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      -- calling `setup` is optional for customization
+      require("fzf-lua").setup({})
+    end
   },
 
   -- fzf extension for telescope with better speed
@@ -419,10 +449,10 @@ require("lazy").setup({
           "regex",
           --          "python",
           "make",
-          'markdown',
-          'markdown_inline',
-          --          "kotlin",
-          --          "java",
+          "markdown",
+          "markdown_inline",
+          "kotlin",
+          "java",
           "json",
           --          "jq",
           "html",
@@ -560,8 +590,6 @@ require("lazy").setup({
         mapping = cmp.mapping.preset.insert {
           ['<C-n>'] = cmp.mapping.select_next_item(),
           ['<C-p>'] = cmp.mapping.select_prev_item(),
-          ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-f>'] = cmp.mapping.scroll_docs(4),
           ['<CR>'] = cmp.mapping.confirm { select = true },
           ['<Tab>'] = cmp.mapping(function(fallback)
             if cmp.visible() then
@@ -599,7 +627,7 @@ require("lazy").setup({
           behavior = cmp.ConfirmBehavior.Insert,
         },
         sources = {
-          { name = 'nvim_lsp' },
+          { name = "nvim_lsp", }, -- priority = 9 },
           { name = "luasnip", keyword_length = 2 },
           { name = "buffer",  keyword_length = 5 },
         },
@@ -711,17 +739,17 @@ require("lazy").setup({
   --   end
   -- },
 
-  -- {
-  --   -- "sourcegraph/sg.nvim",
-  --   "mradspieler/sg.nvim",
-  --   dependencies = {
-  --     "nvim-lua/plenary.nvim",
-  --     "nvim-telescope/telescope.nvim",
-  --   },
-  --   config = function()
-  --     require("sg").setup({})
-  --   end
-  -- },
+  {
+    -- "sourcegraph/sg.nvim",
+    "mradspieler/sg.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-telescope/telescope.nvim",
+    },
+    config = function()
+      require("sg").setup({})
+    end
+  },
 
   -- {
   --   "github/copilot.vim",
@@ -755,17 +783,6 @@ require("lazy").setup({
   --     "nvim-telescope/telescope.nvim"
   --   }
   -- }
-
-
-  {
-    "ibhagwan/fzf-lua",
-    -- optional for icon support
-    dependencies = { "nvim-tree/nvim-web-devicons" },
-    config = function()
-      -- calling `setup` is optional for customization
-      require("fzf-lua").setup({})
-    end
-  },
 
   {
     "CopilotC-Nvim/CopilotChat.nvim",
