@@ -1,22 +1,22 @@
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-local prompts = {
-  -- Code related prompts
-  Explain = "Please explain how the following code works.",
-  Review = "Please review the following code and provide suggestions for improvement.",
-  Tests = "Please explain how the selected code works, then generate unit tests for it.",
-  Refactor = "Please refactor the following code to improve its clarity and readability.",
-  FixCode = "Please fix the following code to make it work as intended.",
-  FixError = "Please explain the error in the following text and provide a solution.",
-  BetterNamings = "Please provide better names for the following variables and functions.",
-  Documentation = "Please provide documentation for the following code.",
-  SwaggerApiDocs = "Please provide documentation for the following API using Swagger.",
-  SwaggerJsDocs = "Please write JSDoc for the following API using Swagger.",
-  -- Text related prompts
-  Summarize = "Please summarize the following text.",
-  Spelling = "Please correct any grammar and spelling errors in the following text.",
-  Wording = "Please improve the grammar and wording of the following text.",
-  Concise = "Please rewrite the following text to make it more concise.",
-}
+-- local prompts = {
+--   -- Code related prompts
+--   Explain = "Please explain how the following code works.",
+--   Review = "Please review the following code and provide suggestions for improvement.",
+--   Tests = "Please explain how the selected code works, then generate unit tests for it.",
+--   Refactor = "Please refactor the following code to improve its clarity and readability.",
+--   FixCode = "Please fix the following code to make it work as intended.",
+--   FixError = "Please explain the error in the following text and provide a solution.",
+--   BetterNamings = "Please provide better names for the following variables and functions.",
+--   Documentation = "Please provide documentation for the following code.",
+--   SwaggerApiDocs = "Please provide documentation for the following API using Swagger.",
+--   SwaggerJsDocs = "Please write JSDoc for the following API using Swagger.",
+--   -- Text related prompts
+--   Summarize = "Please summarize the following text.",
+--   Spelling = "Please correct any grammar and spelling errors in the following text.",
+--   Wording = "Please improve the grammar and wording of the following text.",
+--   Concise = "Please rewrite the following text to make it more concise.",
+-- }
 
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
@@ -81,6 +81,7 @@ require("lazy").setup({
 
   -- search selection via *
   { 'bronson/vim-visual-star-search' },
+  { 'nanotee/sqls.nvim' },
 
   -- git
   {
@@ -89,13 +90,14 @@ require("lazy").setup({
       "nvim-lua/plenary.nvim",
     },
   },
-
+  {
+    'tpope/vim-fugitive',
+  },
   {
     'lewis6991/gitsigns.nvim',
-    -- tag = 'release' -- To use the latest release (do not use this if you run Neovim nightly or dev builds!)
+    -- tag = 'release', -- To use the latest release (do not use this if you run Neovim nightly or dev builds!)
     config = function()
-      require("gitsigns").setup({
-      })
+      require("gitsigns").setup({ })
     end,
   },
 
@@ -199,7 +201,11 @@ require("lazy").setup({
             require('lspconfig').lua_ls.setup(lua_opts)
           end,
           sqls = function()
-            require('lspconfig').sqls.setup {}
+            require('lspconfig').sqls.setup{
+              on_attach = function(client, bufnr)
+                  require('sqls').on_attach(client, bufnr)
+              end
+            }
           end,
           jdtls = function()
             require('lspconfig').jdtls.setup {}
@@ -223,6 +229,7 @@ require("lazy").setup({
           gopls = function()
             require('lspconfig').gopls.setup({
               flags = { debounce_text_changes = 200 },
+              filetypes = { "go", "gomod", "gowork", "gohtml", "gotmpl", "go.html", "go.tmpl" },
               settings = {
                 gopls = {
                   usePlaceholders = true,
@@ -314,7 +321,6 @@ require("lazy").setup({
 
   { "rcarriga/nvim-dap-ui",          requires = { "mfussenegger/nvim-dap" } },
 
-
   -- java section
   {
     'nvim-java/nvim-java',
@@ -369,9 +375,9 @@ require("lazy").setup({
       { 'gS', function() require 'splitjoin'.split() end, desc = 'Split the object under cursor' },
     },
   },
- 
+
   -- fzf lua extension
-    {
+  {
     "ibhagwan/fzf-lua",
     -- optional for icon support
     dependencies = { "nvim-tree/nvim-web-devicons" },
@@ -709,6 +715,18 @@ require("lazy").setup({
     end
   },
 
+  { 'akinsho/toggleterm.nvim', version = "*", config = true },
+
+  {
+    "ryanmsnyder/toggleterm-manager.nvim",
+    dependencies = {
+      "akinsho/nvim-toggleterm.lua",
+      "nvim-telescope/telescope.nvim",
+      "nvim-lua/plenary.nvim", -- only needed because it's a dependency of telescope
+    },
+    config = true,
+  },
+
   -- {
   --   "David-Kunz/gen.nvim",
   --   opts = {
@@ -740,8 +758,8 @@ require("lazy").setup({
   -- },
 
   {
-    -- "sourcegraph/sg.nvim",
-    "mradspieler/sg.nvim",
+    "sourcegraph/sg.nvim",
+    -- "mradspieler/sg.nvim",
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-telescope/telescope.nvim",
@@ -1028,7 +1046,6 @@ vim.opt.wrap = true
 -- i.e: <leader>w saves the current file
 vim.g.mapleader = ','
 
-
 -- global cwd
 vim.g.mycwd = vim.fn.getcwd()
 
@@ -1036,21 +1053,18 @@ vim.g.mycwd = vim.fn.getcwd()
 vim.keymap.set("n", "<leader>jq", "<cmd>:%!jq .<CR>")
 
 -- Fast saving
-vim.keymap.set('n', '<leader>w', ':write!<CR>')
-vim.keymap.set('n', '<leader>q', ':q!<CR>', { silent = true })
+vim.keymap.set("n", '<leader>w', ':write!<CR>')
+vim.keymap.set("i", '<leader>w', '<C-o>:write!<CR>')
+vim.keymap.set("n", '<leader>q', ':q!<CR>', { silent = true })
+vim.keymap.set("i", '<leader>q', '<C-o>:q!<CR>', { silent = true })
 
 -- Some useful quickfix shortcuts for quickfix
 vim.keymap.set('n', '<C-n>', '<cmd>cnext<CR>zz')
 vim.keymap.set('n', '<C-m>', '<cmd>cprev<CR>zz')
 vim.keymap.set('n', '<leader>a', '<cmd>cclose<CR>')
 
--- Exit on jj and jk
-vim.keymap.set('n', 'j', 'gj')
-vim.keymap.set('n', 'k', 'gk')
-
--- Exit on jj and jk
+-- Exit mode in insert mode on jj
 vim.keymap.set('i', 'jj', '<ESC>')
-vim.keymap.set('i', 'jk', '<ESC>')
 
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
@@ -1067,9 +1081,9 @@ vim.keymap.set('n', 'N', 'Nzzzv', { noremap = true })
 -- setup mapping to call :LazyGit
 vim.keymap.set('n', '<leader>aa', ':LazyGit<CR>')
 
--- setup mapping for gitsigns
-vim.keymap.set("n", "<leader>gp", ":Gitsigns preview_hunk<CR>", {})
-vim.keymap.set("n", "<leader>gb", ":Gitsigns blame_line<CR>", {})
+-- setup mapping for git
+vim.keymap.set("n", "<leader>gp", ":Gdiff<CR>", {})
+vim.keymap.set("n", "<leader>gb", ":G blame<CR>", {})
 
 -- Don't jump forward if I higlight and search for a word
 local function stay_star()
@@ -1177,7 +1191,6 @@ vim.keymap.set('n', '<leader>tt', ':write!<CR>:GoAlt!<CR>', { noremap = true, si
 -- telescope
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>gf', builtin.git_files, {})
--- vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
 vim.keymap.set('n', '<leader>ff', function() builtin.find_files({ cwd = vim.g.mycwd }) end, {})
 vim.keymap.set('n', '<leader>ld', builtin.lsp_document_symbols, {})
 vim.keymap.set('n', '<leader>td', builtin.diagnostics, {})
