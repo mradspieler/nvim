@@ -81,7 +81,13 @@ require("lazy").setup({
 
   -- search selection via *
   { 'bronson/vim-visual-star-search' },
-  { 'nanotee/sqls.nvim' },
+
+  -- sql
+  {
+    "tpope/vim-dadbod",
+    "kristijanhusak/vim-dadbod-completion",
+    "kristijanhusak/vim-dadbod-ui",
+  },
 
   -- git
   {
@@ -97,7 +103,7 @@ require("lazy").setup({
     'lewis6991/gitsigns.nvim',
     -- tag = 'release', -- To use the latest release (do not use this if you run Neovim nightly or dev builds!)
     config = function()
-      require("gitsigns").setup({ })
+      require("gitsigns").setup({})
     end,
   },
 
@@ -200,13 +206,6 @@ require("lazy").setup({
             local lua_opts = lsp_zero.nvim_lua_ls()
             require('lspconfig').lua_ls.setup(lua_opts)
           end,
-          sqls = function()
-            require('lspconfig').sqls.setup{
-              on_attach = function(client, bufnr)
-                  require('sqls').on_attach(client, bufnr)
-              end
-            }
-          end,
           jdtls = function()
             require('lspconfig').jdtls.setup {}
           end,
@@ -268,13 +267,44 @@ require("lazy").setup({
       local cmp_format = lsp_zero.cmp_format()
 
       cmp.setup({
-        formatting = cmp_format,
-        mapping = cmp.mapping.preset.insert({
-          -- scroll up and down the documentation window
-          ['<C-Space>'] = cmp.mapping.complete(),
-          ['<C-e>'] = cmp.mapping.abort(),
-          ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-        }),
+        sources = {
+          { name = "nvim_lsp" },
+          { name = "cody" },
+          { name = "path" },
+          { name = "buffer" },
+        },
+        -- formatting = cmp_format,
+        -- mapping = cmp.mapping.preset.insert({
+        --   -- scroll up and down the documentation window
+        --   ['<C-Space>'] = cmp.mapping.complete(),
+        --   ['<C-e>'] = cmp.mapping.abort(),
+        --   ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+        -- }),
+        mapping = {
+          ["<C-n>"] = cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Insert },
+          ["<C-p>"] = cmp.mapping.select_prev_item { behavior = cmp.SelectBehavior.Insert },
+          ["<C-y>"] = cmp.mapping(
+            cmp.mapping.confirm {
+              behavior = cmp.ConfirmBehavior.Insert,
+              select = true,
+            },
+            { "i", "c" }
+          ),
+        },
+
+        -- Enable luasnip to handle snippet expansion for nvim-cmp
+        snippet = {
+          expand = function(args)
+            vim.snippet.expand(args.body)
+          end,
+        },
+      })
+      -- Setup up vim-dadbod
+      cmp.setup.filetype({ "sql" }, {
+        sources = {
+          { name = "vim-dadbod-completion" },
+          { name = "buffer" },
+        },
       })
     end,
   },
@@ -634,8 +664,8 @@ require("lazy").setup({
         },
         sources = {
           { name = "nvim_lsp", }, -- priority = 9 },
-          { name = "luasnip", keyword_length = 2 },
-          { name = "buffer",  keyword_length = 5 },
+          { name = "luasnip",  keyword_length = 2 },
+          { name = "buffer",   keyword_length = 5 },
         },
       })
     end,
@@ -715,7 +745,7 @@ require("lazy").setup({
     end
   },
 
-  { 'akinsho/toggleterm.nvim', version = "*", config = true },
+  { 'akinsho/toggleterm.nvim',                version = "*", config = true },
 
   {
     "ryanmsnyder/toggleterm-manager.nvim",
