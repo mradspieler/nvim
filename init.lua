@@ -158,6 +158,11 @@ require("lazy").setup({
   },
 
   -- markdown
+  {
+    'MeanderingProgrammer/render-markdown.nvim',
+    opts = {},
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+  },
   -- {
   --   "iamcco/markdown-preview.nvim",
   --   cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
@@ -1082,6 +1087,9 @@ vim.g.mycwd = vim.fn.getcwd()
 -- json formatting
 vim.keymap.set("n", "<leader>jq", "<cmd>:%!jq .<CR>")
 
+-- sql formatting
+vim.keymap.set("n", "<leader>sq", "<cmd>:%!pg_format --spaces 2 --function-case 2<CR>")
+
 -- Fast saving
 vim.keymap.set("n", '<leader>w', ':write!<CR>')
 vim.keymap.set("i", '<leader>w', '<C-o>:write!<CR>')
@@ -1304,10 +1312,10 @@ vim.api.nvim_command('autocmd VimResized * wincmd =')
 -- vim.lsp.set_log_level("debug")
 
 -- copilot config
-vim.keymap.set('i', '<C-j>', 'copilot#Accept("\\<CR>")', {
-  expr = true,
-  replace_keycodes = false
-})
+-- vim.keymap.set('i', '<C-j>', 'copilot#Accept("\\<CR>")', {
+--   expr = true,
+--   replace_keycodes = false
+-- })
 -- vim.keymap.set('n', '<leader>ae', '<cmd>CopilotChatExplain<cr>',
 --   { silent = true, noremap = true, desc = 'CopilotChat - Explain code' })
 -- vim.keymap.set('n', "<leader>at", "<cmd>CopilotChatTests<cr>",
@@ -1319,6 +1327,5 @@ vim.keymap.set('i', '<C-j>', 'copilot#Accept("\\<CR>")', {
 -- vim.keymap.set('n', "<leader>an", "<cmd>CopilotChatBetterNamings<cr>",
 --   { silent = true, noremap = true, desc = "CopilotChat - Better Naming" })
 
-vim.g.copilot_no_tab_map = true
-
-vim.api.nvim_set_hl(0, 'CopilotSuggestion', { fg = '#E3242B', ctermfg = 8 })
+-- vim.g.copilot_no_tab_map = true
+-- vim.api.nvim_set_hl(0, 'CopilotSuggestion', { fg = '#E3242B', ctermfg = 8 })
