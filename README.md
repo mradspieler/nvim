@@ -29,6 +29,7 @@
 |\<leader\>fb|builtin.buffers|
 |\<leader\>fh|builtin.command_history|
 |\<leader\>fe|:Telescope file_browser|
+|\<leader\>ls|:Telescope luasnip|
 
 #### diagnostics
 | Command | Description |
