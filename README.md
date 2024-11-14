@@ -28,7 +28,6 @@
 |\<leader\>lg|builtin.live_grep|
 |\<leader\>fb|builtin.buffers|
 |\<leader\>fh|builtin.command_history|
-|\<leader\>fe|:Telescope file_browser|
 |\<leader\>ls|:Telescope luasnip|
 
 #### diagnostics
