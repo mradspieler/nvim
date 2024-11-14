@@ -1,4 +1,4 @@
-### cheatsheet
+### my nvim cheatsheet
 #### File-tree mappings
 | Command | Description |
 | --- | --- |
