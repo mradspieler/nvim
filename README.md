@@ -2,64 +2,64 @@
 #### File-tree mappings
 | Command | Description |
 | --- | --- |
-|\<leader\>n|NvimTreeToggle|
+|,n|NvimTreeToggle|
 
 #### undotree
 | Command | Description |
 | --- | --- |
-|\<leader\>u|UndotreeToggle|
+|,u|UndotreeToggle|
 
 #### go.nvim
 | Command | Description |
 | --- | --- |
-|\<leader\>b|:GoBuild|
-|\<leader\>r|:GoRun|
-|\<leader\>gv|:GoAltV|
-|\<leader\>tt|:GoAlt|
+|,b|:GoBuild|
+|,r|:GoRun|
+|,gv|:GoAltV|
+|,tt|:GoAlt|
 
 #### telescope
 | Command | Description |
 | --- | --- |
-|\<leader\>gf|builtin.git_files|
-|\<leader\>ff|builtin.find_files|
-|\<leader\>ld|builtin.lsp_document_symbols|
-|\<leader\>td|builtin.diagnostics|
-|\<leader\>gs|builtin.grep_string|
-|\<leader\>lg|builtin.live_grep|
-|\<leader\>fb|builtin.buffers|
-|\<leader\>fh|builtin.command_history|
-|\<leader\>ls|:Telescope luasnip|
+|,gf|builtin.git_files|
+|,ff|builtin.find_files|
+|,ld|builtin.lsp_document_symbols|
+|,td|builtin.diagnostics|
+|,gs|builtin.grep_string|
+|,lg|builtin.live_grep|
+|,fb|builtin.buffers|
+|,fh|builtin.command_history|
+|,ls|:Telescope luasnip|
 
 #### diagnostics
 | Command | Description |
 | --- | --- |
-|\<leader\>do|vim.diagnostic.open_float|
-|\<leader\>dp|vim.diagnostic.goto_prev|
-|\<leader\>dn|vim.diagnostic.goto_next|
-|\<leader\>ds|vim.diagnostic.setqflist|
+|,do|vim.diagnostic.open_float|
+|,dp|vim.diagnostic.goto_prev|
+|,dn|vim.diagnostic.goto_next|
+|,ds|vim.diagnostic.setqflist|
 
 #### LSP
 | Command | Description |
 | --- | --- |
 |gd|definition|
-|\<leader\>v|vsplit definition|
-|\<leader\>s|belowright split definition|
+|,v|vsplit definition|
+|,s|belowright split definition|
 |gr|references|
 |gD|declaration|
 |K|Hover - Documentation|
 |gi|implementation|
-|\<leader\>cl|codelens.run|
-|\<leader\>rn|rename|
-|\<leader\>ca|code_action|
+|,cl|codelens.run|
+|,rn|rename|
+|,ca|code_action|
 
 #### Trouble
 | Command | Description |
 | --- | --- |
-|\<leader\>xx|TroubleToggle|
-|\<leader\>xw|TroubleToggle workspace_diagnostics|
-|\<leader\>xd|TroubleToggle document_diagnostics|
-|\<leader\>xl|TroubleToggle loclist|
-|\<leader\>xq|TroubleToggle quickfix|
+|,xx|TroubleToggle|
+|,xw|TroubleToggle workspace_diagnostics|
+|,xd|TroubleToggle document_diagnostics|
+|,xl|TroubleToggle loclist|
+|,xq|TroubleToggle quickfix|
 |gR|TroubleToggle lsp_references|
 
 #### General
@@ -73,17 +73,17 @@
 #### Copilot
 | Command | Description |
 | --- | --- |
-|\<leader\>ah|Help actions|
-|\<leader\>ap|Prompt actions|
-|\<leader\>ae|Explain code|
-|\<leader\>at|Generate tests|
-|\<leader\>ar|Review code|
-|\<leader\>aR|Refactor code|
-|\<leader\>an|Better Naming|
-|\<leader\>av|Open in vertical split - Toggle|
-|\<leader\>ax|Inline chat|
-|\<leader\>ai|Ask input|
-|\<leader\>am|Generate commit message for all changes|
-|\<leader\>aM|Generate commit message for staged changes|
-|\<leader\>aq|Quick chat|
-|\<leader\>al|Clear buffer and chat history|
+|,ah|Help actions|
+|,ap|Prompt actions|
+|,ae|Explain code|
+|,at|Generate tests|
+|,ar|Review code|
+|,aR|Refactor code|
+|,an|Better Naming|
+|,av|Open in vertical split - Toggle|
+|,ax|Inline chat|
+|,ai|Ask input|
+|,am|Generate commit message for all changes|
+|,aM|Generate commit message for staged changes|
+|,aq|Quick chat|
+|,al|Clear buffer and chat history|
