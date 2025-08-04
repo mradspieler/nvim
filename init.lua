@@ -163,14 +163,13 @@ require("lazy").setup({
     opts = {},
     dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
   },
-
-  -- install without yarn or npm
-  {
-    "iamcco/markdown-preview.nvim",
-    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
-    ft = { "markdown" },
-    build = function() vim.fn["mkdp#util#install"]() end,
-  },
+  -- {
+  --   "iamcco/markdown-preview.nvim",
+  --   cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+  --   ft = { "markdown" },
+  --   build = function() vim.fn["mkdp#util#install"]() end,
+  --   lazy = false,
+  -- },
 
   -- programming languages / debugger
   {
@@ -205,15 +204,12 @@ require("lazy").setup({
       --- read this: https://github.com/VonHeikemen/lsp-zero.nvim/blob/v3.x/doc/md/guides/integrate-with-mason-nvim.md
       require('mason').setup({})
       require('mason-lspconfig').setup({
-        ensure_installed = { "gopls", "jsonls", "jdtls", "kotlin_language_server" },
+        ensure_installed = { "gopls", "jsonls" },
         handlers = {
           lsp_zero.default_setup,
           lua_ls = function()
             local lua_opts = lsp_zero.nvim_lua_ls()
             require('lspconfig').lua_ls.setup(lua_opts)
-          end,
-          jdtls = function()
-            require('lspconfig').jdtls.setup {}
           end,
           jsonls = function()
             require('lspconfig').jsonls.setup {}
@@ -273,44 +269,16 @@ require("lazy").setup({
       local cmp_format = lsp_zero.cmp_format()
 
       cmp.setup({
-        sources = {
-          { name = "nvim_lsp" },
-          { name = "cody" },
-          { name = "path" },
-          { name = "buffer" },
-        },
-        -- formatting = cmp_format,
-        -- mapping = cmp.mapping.preset.insert({
-        --   -- scroll up and down the documentation window
-        --   ['<C-Space>'] = cmp.mapping.complete(),
-        --   ['<C-e>'] = cmp.mapping.abort(),
-        --   ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-        -- }),
-        mapping = {
-          ["<C-n>"] = cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Insert },
-          ["<C-p>"] = cmp.mapping.select_prev_item { behavior = cmp.SelectBehavior.Insert },
-          ["<C-y>"] = cmp.mapping(
-            cmp.mapping.confirm {
-              behavior = cmp.ConfirmBehavior.Insert,
-              select = true,
-            },
-            { "i", "c" }
-          ),
-        },
-
-        -- Enable luasnip to handle snippet expansion for nvim-cmp
-        snippet = {
-          expand = function(args)
-            vim.snippet.expand(args.body)
-          end,
-        },
-      })
-      -- Setup up vim-dadbod
-      cmp.setup.filetype({ "sql" }, {
-        sources = {
-          { name = "vim-dadbod-completion" },
-          { name = "buffer" },
-        },
+        formatting = cmp_format,
+        mapping = cmp.mapping.preset.insert({
+          -- scroll up and down the documentation window
+          ['<C-Space>'] = cmp.mapping.complete(),
+          ['<C-e>'] = cmp.mapping.abort(),
+          ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+        }),
+        enabled = function()
+          return vim.api.nvim_buf_get_option(0, 'modifiable')
+        end,
       })
     end,
   },
@@ -383,10 +351,14 @@ require("lazy").setup({
   {
     "folke/trouble.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
-    opts = {
-      -- your configuration comes here
-      -- or leave it empty to use the default settings
-      -- refer to the configuration section below
+    opts = {}, -- for default options, refer to the configuration section for custom setup.
+    cmd = "Trouble",
+    keys = {
+      {
+        "<leader>xq",
+        "<cmd>Trouble quickfix toggle<cr>",
+        desc = "Quickfix List (Trouble)",
+      },
     },
   },
 
@@ -430,6 +402,11 @@ require("lazy").setup({
 
   { 'nvim-telescope/telescope-ui-select.nvim' },
 
+  {
+    "benfowler/telescope-luasnip.nvim",
+    module = "telescope._extensions.luasnip",  -- if you wish to lazy-load
+  },
+
   -- fuzzy finder framework
   {
     "nvim-telescope/telescope.nvim",
@@ -459,6 +436,8 @@ require("lazy").setup({
       -- To get ui-select loaded and working with telescope, you need to call
       -- load_extension, somewhere after setup function:
       require("telescope").load_extension("ui-select")
+
+      require('telescope').load_extension('luasnip')
     end,
   },
 
@@ -751,7 +730,7 @@ require("lazy").setup({
     end
   },
 
-  { 'akinsho/toggleterm.nvim',                version = "*", config = true },
+  { 'akinsho/toggleterm.nvim', version = "*", config = true },
 
   {
     "ryanmsnyder/toggleterm-manager.nvim",
@@ -840,13 +819,12 @@ require("lazy").setup({
 
   -- {
   --   "CopilotC-Nvim/CopilotChat.nvim",
-  --   -- version = "v2.4.0",
-  --   branch = "canary", -- Use the canary branch if you want to test the latest features but it might be unstable
-  --   -- Do not use branch and version together, either use branch or version
+  --   branch = "main", 
   --   dependencies = {
   --     { "nvim-lua/plenary.nvim" },
   --     { "github/copilot.vim" },
   --   },
+  --   build = "make tiktoken",
   --   opts = {
   --     prompts = prompts,
   --     mappings = {
@@ -1039,6 +1017,64 @@ require("lazy").setup({
   --     { "<leader>av", "<cmd>CopilotChatToggle<cr>",        desc = "CopilotChat - Toggle" },
   --   },
   -- },
+
+  {
+    "Davidyz/VectorCode",
+    version = "*", -- optional, depending on whether you're on nightly or release
+    build = "pipx upgrade vectorcode", -- optional but recommended. This keeps your CLI up-to-date.
+    dependencies = { "nvim-lua/plenary.nvim" },
+  },
+  {
+    "olimorris/codecompanion.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-treesitter/nvim-treesitter",
+      "ravitemer/codecompanion-history.nvim",
+    },
+    config = function()
+      require("codecompanion").setup({
+        extensions = {
+          vectorcode = {
+            opts = {
+              add_tool = true,
+            }
+          },
+          history = {
+            enabled = true,
+            opts = {
+              -- Keymap to open history from chat buffer (default: gh)
+              keymap = "gh",
+              -- Keymap to save the current chat manually (when auto_save is disabled)
+              save_chat_keymap = "sc",
+              -- Save all chats by default (disable to save only manually using 'sc')
+              auto_save = true,
+              -- Number of days after which chats are automatically deleted (0 to disable)
+              expiration_days = 0,
+              -- Picker interface (auto resolved to a valid picker)
+              picker = "telescope", --- ("telescope", "snacks", "fzf-lua", or "default") 
+              ---Automatically generate titles for new chats
+              auto_generate_title = true,
+              title_generation_opts = {
+                ---Adapter for generating titles (defaults to current chat adapter) 
+                adapter = nil, -- "copilot"
+                ---Model for generating titles (defaults to current chat model)
+                model = nil, -- "gpt-4o"
+              },
+              ---On exiting and entering neovim, loads the last chat on opening chat
+              continue_last_chat = false,
+              ---When chat is cleared with `gx` delete the chat from history
+              delete_on_clearing_chat = false,
+              ---Directory path to save the chats
+              dir_to_save = vim.fn.stdpath("data") .. "/codecompanion-history",
+              ---Enable detailed logging for history extension
+              enable_logging = false,
+            }
+          }
+        }
+      })
+    end,
+
+  },
 })
 
 ----------------
@@ -1105,10 +1141,6 @@ vim.keymap.set('n', '<leader>a', '<cmd>cclose<CR>')
 -- Exit mode in insert mode on jj
 vim.keymap.set('i', 'jj', '<ESC>')
 
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
-vim.keymap.set("n", "J", "mzJ`z")
-
 -- Remove search highlight
 vim.keymap.set('n', '<leader><space>', ':nohlsearch<CR>')
 
@@ -1118,11 +1150,14 @@ vim.keymap.set('n', 'n', 'nzzzv', { noremap = true })
 vim.keymap.set('n', 'N', 'Nzzzv', { noremap = true })
 
 -- setup mapping to call :LazyGit
-vim.keymap.set('n', '<leader>aa', ':LazyGit<CR>')
+vim.keymap.set('n', '<leader>gi', ':LazyGit<CR>')
 
 -- setup mapping for git
 vim.keymap.set("n", "<leader>gp", ":Gdiff<CR>", {})
 vim.keymap.set("n", "<leader>gb", ":G blame<CR>", {})
+
+vim.keymap.set("n", "<leader>cc", ":CodeCompanionChat toggle<CR>", {})
+vim.keymap.set("n", "<leader>co", ":CodeCompanionActions<CR>", {})
 
 -- Don't jump forward if I higlight and search for a word
 local function stay_star()
@@ -1162,6 +1197,7 @@ vim.keymap.set('n', 'Y', 'y$')
 -- Visually select lines, and move them up/down
 vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv")
 vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv")
+vim.keymap.set("n", "J", "mzJ`z")
 
 -- Terminal
 -- Clost terminal window, even if we are in insert mode
@@ -1224,6 +1260,7 @@ vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
 -- go.nvim
 vim.keymap.set('n', '<leader>b', ':write!<CR>:GoBuild<CR>')
 vim.keymap.set('n', '<leader>r', ':write!<CR>:GoRun -F<CR>')
+vim.keymap.set('n', '<leader>t', ':write!<CR>:GoTest -n<CR>')
 vim.keymap.set('n', '<leader>gv', ':write!<CR>:GoAltV!<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<leader>tt', ':write!<CR>:GoAlt!<CR>', { noremap = true, silent = true })
 
@@ -1310,6 +1347,7 @@ vim.keymap.set("n", "gR", "<cmd>TroubleToggle lsp_references<cr>", { silent = tr
 
 -- automatically resize all vim buffers if I resize the terminal window
 vim.api.nvim_command('autocmd VimResized * wincmd =')
+vim.keymap.set("n", "<leader>ls", "<cmd>lua require(\"luasnip.loaders\").edit_snippet_files()<cr>", { silent = true, noremap = true })
 -- vim.lsp.set_log_level("debug")
 
 -- copilot config
@@ -1330,3 +1368,14 @@ vim.api.nvim_command('autocmd VimResized * wincmd =')
 
 -- vim.g.copilot_no_tab_map = true
 -- vim.api.nvim_set_hl(0, 'CopilotSuggestion', { fg = '#E3242B', ctermfg = 8 })
+-- vim.api.nvim_set_hl(0, 'CopilotSuggestion', { fg = '#E3242B', ctermfg = 8 })
+-- vim.api.nvim_create_autocmd("FileType", {
+--   pattern = "*",  -- or "*" for all types
+--   callback = function()
+--     vim.opt_local.foldmethod      = "expr"
+--     vim.opt_local.foldexpr        = "nvim_treesitter#foldexpr()"
+vim.opt_local.foldlevelstart  = 99
+vim.opt.foldenable            = false
+end,
+})
+
