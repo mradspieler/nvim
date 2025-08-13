@@ -135,116 +135,9 @@ require("lazy").setup({
     dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
   },
 
-  -- programming languages / debugger
   {
-    'VonHeikemen/lsp-zero.nvim',
-    branch = 'v3.x',
-    dependencies = {
-      { 'neovim/nvim-lspconfig' },
-      { 'williamboman/mason.nvim' },
-      { 'williamboman/mason-lspconfig.nvim' },
-
-      -- Autocompletion
-      { 'hrsh7th/nvim-cmp' },
-      { 'hrsh7th/cmp-nvim-lsp' },
-      {
-        "L3MON4D3/LuaSnip",
-        dependencies = { "rafamadriz/friendly-snippets" },
-        config = function()
-          require("luasnip.loaders.from_vscode").lazy_load()
-        end
-      },
-    },
-    config = function()
-      local lsp_zero = require('lsp-zero')
-
-      lsp_zero.on_attach(function(client, bufnr)
-        -- see :help lsp-zero-keybindings
-        -- to learn the available actions
-        lsp_zero.default_keymaps({ buffer = bufnr })
-      end)
-
-      --- if you want to know more about lsp-zero and mason.nvim
-      --- read this: https://github.com/VonHeikemen/lsp-zero.nvim/blob/v3.x/doc/md/guides/integrate-with-mason-nvim.md
-      require('mason').setup({})
-      require('mason-lspconfig').setup({
-        ensure_installed = { "gopls", "jsonls" },
-        handlers = {
-          lsp_zero.default_setup,
-          lua_ls = function()
-            local lua_opts = lsp_zero.nvim_lua_ls()
-            require('lspconfig').lua_ls.setup(lua_opts)
-          end,
-          jsonls = function()
-            require('lspconfig').jsonls.setup {}
-          end,
-          yamlls = function()
-            require('lspconfig').yamlls.setup {
-              settings = {
-                yaml = {
-                  schemas = {
-                    ["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*",
-                    ["../path/relative/to/file.yml"] = "/.github/workflows/*",
-                    ["/path/from/root/of/project"] = "/.github/workflows/*",
-                  },
-                },
-              }
-            }
-          end,
-          gopls = function()
-            require('lspconfig').gopls.setup({
-              flags = { debounce_text_changes = 200 },
-              filetypes = { "go", "gomod", "gowork", "gohtml", "gotmpl", "go.html", "go.tmpl" },
-              settings = {
-                gopls = {
-                  usePlaceholders = true,
-                  codelenses = {
-                    gc_details = false,
-                    generate = true,
-                    regenerate_cgo = true,
-                    run_govulncheck = true,
-                    test = true,
-                    tidy = true,
-                    upgrade_dependency = true,
-                    vendor = true,
-                  },
-                  experimentalPostfixCompletions = true,
-                  completeUnimported = true,
-                  staticcheck = true,
-                  directoryFilters = { "-.git", "-node_modules" },
-                  semanticTokens = true,
-                  hints = {
-                    assignVariableTypes = true,
-                    compositeLiteralFields = true,
-                    compositeLiteralTypes = true,
-                    constantValues = true,
-                    functionTypeParameters = true,
-                    parameterNames = true,
-                    rangeVariableTypes = true,
-                  },
-                },
-              },
-            })
-          end,
-        }
-      })
-
-      local cmp = require('cmp')
-      local cmp_format = lsp_zero.cmp_format()
-
-      cmp.setup({
-        formatting = cmp_format,
-        mapping = cmp.mapping.preset.insert({
-          -- scroll up and down the documentation window
-          ['<C-Space>'] = cmp.mapping.complete(),
-          ['<C-e>'] = cmp.mapping.abort(),
-          ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-        }),
-        enabled = function()
-          return vim.api.nvim_buf_get_option(0, 'modifiable')
-        end,
-      })
-    end,
+    "mason-org/mason.nvim",
+    opts = {}
   },
 
   {
@@ -263,7 +156,6 @@ require("lazy").setup({
     "ray-x/go.nvim",
     dependencies = { -- optional packages
       "ray-x/guihua.lua",
-      "neovim/nvim-lspconfig",
       "ray-x/navigator.lua",
       "mfussenegger/nvim-dap",
       "nvim-treesitter/nvim-treesitter",
@@ -298,10 +190,9 @@ require("lazy").setup({
       'nvim-java/nvim-java-test',
       'nvim-java/nvim-java-dap',
       'MunifTanjim/nui.nvim',
-      'neovim/nvim-lspconfig',
       'mfussenegger/nvim-dap',
       {
-        'williamboman/mason.nvim',
+        'mason-org/mason.nvim',
         opts = {
           registries = {
             'github:nvim-java/mason-registry',
@@ -717,81 +608,231 @@ require("lazy").setup({
   },
 
   {
-    "Davidyz/VectorCode",
-    version = "*",                     -- optional, depending on whether you're on nightly or release
-    build = "pipx upgrade vectorcode", -- optional but recommended. This keeps your CLI up-to-date.
-    dependencies = { "nvim-lua/plenary.nvim" },
-  },
-  {
-    "olimorris/codecompanion.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-treesitter/nvim-treesitter",
-      "ravitemer/codecompanion-history.nvim",
+
+    {
+      "Davidyz/VectorCode",
+      version = "*",                     -- optional, depending on whether you're on nightly or release
+      build = "pipx upgrade vectorcode", -- optional but recommended. This keeps your CLI up-to-date.
+      dependencies = { "nvim-lua/plenary.nvim" },
     },
-    config = function()
-      require("codecompanion").setup({
-        adapters = {
-          deepseek = function()
-            return require("codecompanion.adapters").extend("deepseek", {
-              env = {
-                api_key = "sk-252184636aad41f09d6453272def527f",
+    {
+      "olimorris/codecompanion.nvim",
+      dependencies = {
+        "nvim-lua/plenary.nvim",
+        "nvim-treesitter/nvim-treesitter",
+        "ravitemer/codecompanion-history.nvim",
+      },
+      config = function()
+        require("codecompanion").setup({
+          strategies = {
+            chat = {
+              adapter = {
+                name = "copilot",
+                -- model = "claude-sonnet-4",
               },
-              schema = {
-                model = {
-                  default = "deepseek-chat",
+            },
+          },
+          prompt_library = {
+            ["EmailImprover"] = {
+              strategy = "chat",
+              description = "Please improve my german email.",
+              opts = {
+                short_name = "emailImprover",
+                auto_submit = true,
+                stop_context_insertion = false,
+              },
+              prompts = {
+                {
+                  role = "system",
+                  content = function(context)
+                    return
+                    "Act as a professional business communication expert. Enhance the following German email by adding easy-to-understand foreign words as synonyms where appropriate. Use short sentences, each with a maximum of 25 words. Avoid the subjunctive mood. Ensure the tone is assertive, confident, and authoritative."
+                  end,
+                },
+                {
+                  role = "user",
+                  content = function(context)
+                    return "Please write the new email:\n"
+                  end,
                 },
               },
-            })
-          end,
-        },
-        strategies = {
-          chat = { adapter = "deepseek", },
-          inline = { adapter = "deepseek", },
-          cmd = { adapter = "deepseek", }
-        },
-
-        extensions = {
-          vectorcode = {
-            opts = {
-              add_tool = true,
-            }
-          },
-          history = {
-            enabled = true,
-            opts = {
-              -- Keymap to open history from chat buffer (default: gh)
-              keymap = "gh",
-              -- Keymap to save the current chat manually (when auto_save is disabled)
-              save_chat_keymap = "sc",
-              -- Save all chats by default (disable to save only manually using 'sc')
-              auto_save = true,
-              -- Number of days after which chats are automatically deleted (0 to disable)
-              expiration_days = 0,
-              -- Picker interface (auto resolved to a valid picker)
-              picker = "telescope", --- ("telescope", "snacks", "fzf-lua", or "default")
-              ---Automatically generate titles for new chats
-              auto_generate_title = true,
-              title_generation_opts = {
-                ---Adapter for generating titles (defaults to current chat adapter)
-                adapter = nil, -- "copilot"
-                ---Model for generating titles (defaults to current chat model)
-                model = nil,   -- "gpt-4o"
+            },
+            ["EmailToEnglish"] = {
+              strategy = "chat",
+              description = "Please translate into english and improve email.",
+              opts = {
+                short_name = "emailToEnglisch",
+                auto_submit = true,
+                stop_context_insertion = false,
               },
-              ---On exiting and entering neovim, loads the last chat on opening chat
-              continue_last_chat = false,
-              ---When chat is cleared with `gx` delete the chat from history
-              delete_on_clearing_chat = false,
-              ---Directory path to save the chats
-              dir_to_save = vim.fn.stdpath("data") .. "/codecompanion-history",
-              ---Enable detailed logging for history extension
-              enable_logging = false,
+              prompts = {
+                {
+                  role = "system",
+                  content = function(context)
+                    return
+                    "Act as a professional business translator. Translate the following email into English. Enrich the translation with easy-to-understand synonyms and foreign words where appropriate. Use short sentences with a maximum of 25 words each. Avoid using the subjunctive mood. The tone must be assertive, confident, and professional, suitable for business communication. Present the translation in clear, well-structured English. "
+                  end,
+                },
+                {
+                  role = "user",
+                  content = function(context)
+                    return "Please write the new email:\n"
+                  end,
+                },
+              },
+            },
+            ["Summarize"] = {
+              strategy = "chat",
+              description = "Please summarize the following text.",
+              opts = {
+                short_name = "summarize",
+                auto_submit = true,
+                stop_context_insertion = false,
+              },
+              prompts = {
+                {
+                  role = "system",
+                  content = function(context)
+                    return
+                    "I want you to act as a professional technical writer. Please summarize the following text, focusing on clarity and conciseness. Present the summary in plain language using Markdown formatting."
+                  end,
+                },
+                {
+                  role = "user",
+                  content = function(context)
+                    return "Please summarize the following text:\n"
+                  end,
+                },
+              },
+            },
+            ["BetterNaming"] = {
+              strategy = "inline",
+              description = "Find better names",
+              opts = {
+                short_name = "naming",
+                auto_submit = true,
+                stop_context_insertion = false,
+              },
+              prompts = {
+                {
+                  role = "system",
+                  content = function(context)
+                    return
+                    "I want you to act as a naming expert and senior software developer. Please review the following code and suggest more descriptive and meaningful names for all variables and functions. For each suggested name, briefly explain why it is better. Then, provide the improved code with the new names applied. Use Markdown formatting and include the programming language name at the start of the code block."
+                  end,
+                },
+                {
+                  role = "user",
+                  content = function(context)
+                    return "<user_prompt>Please create better names</user_prompt>"
+                  end,
+                  opts = {
+                    contains_code = true,
+                  }
+                },
+              },
+            },
+            ["Swagger"] = {
+              strategy = "chat",
+              description = "Create a swagger ui description as YAML",
+              opts = {
+                short_name = "swagger",
+                auto_submit = true,
+                stop_context_insertion = false,
+              },
+              prompts = {
+                {
+                  role = "system",
+                  content = function(context)
+                    return
+                    "I want you to act as a software developer. Please generate a Swagger (OpenAPI 3.0) YAML specification for the selected Go HTTP server code. The documentation should include all endpoints, HTTP methods, response formats, and example responses. Output only the YAML content.\n"
+                  end,
+                },
+                {
+                  role = "user",
+                  content = function(context)
+                    return "Please create a swagger doc for\n\n"
+                  end,
+                  opts = {
+                    contains_code = true,
+                  }
+                },
+              },
+            },
+            ["Review"] = {
+              strategy = "chat",
+              description = "Make a review for the provided code",
+              opts = {
+                short_name = "review",
+                auto_submit = true,
+              },
+              prompts = {
+                {
+                  role = "system",
+                  content = function(context)
+                    local bufnr = vim.api.nvim_get_current_buf()
+                    local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+                    local code = table.concat(lines, "\n")
+
+                    return "I want you to act as a senior " ..
+                        context.filetype ..
+                        " developer. Please review the following code and provide suggestions for improvements regarding clarity, readability, and simplicity.\n" ..
+                        code .. "\n```\n\n"
+                  end,
+                },
+                {
+                  role = "user",
+                  content = function(context)
+                    return "Please review the code...\n"
+                  end,
+                  opts = {
+                    contains_code = true,
+                  }
+                },
+              },
+            },
+          },
+          extensions = {
+            vectorcode = {
+              opts = {
+                add_tool = true,
+              }
+            },
+            history = {
+              enabled = true,
+              opts = {
+                -- Keymap to open history from chat buffer (default: gh)
+                keymap = "gh",
+                -- Keymap to save the current chat manually (when auto_save is disabled)
+                save_chat_keymap = "sc",
+                -- Save all chats by default (disable to save only manually using 'sc')
+                auto_save = true,
+                -- Number of days after which chats are automatically deleted (0 to disable)
+                expiration_days = 0,
+                -- Picker interface (auto resolved to a valid picker)
+                picker = "telescope", --- ("telescope", "snacks", "fzf-lua", or "default")
+                ---Automatically generate titles for new chats
+                auto_generate_title = true,
+                title_generation_opts = {
+                  ---Adapter for generating titles (defaults to current chat adapter)
+                  adapter = "copilot",       -- "copilot"
+                  ---Model for generating titles (defaults to current chat model)
+                  model = "claude-sonnet-4", -- "gpt-4o"
+                },
+                ---On exiting and entering neovim, loads the last chat on opening chat
+                continue_last_chat = false,
+                ---When chat is cleared with `gx` delete the chat from history
+                delete_on_clearing_chat = false,
+                ---Directory path to save the chats
+                dir_to_save = vim.fn.stdpath("data") .. "/codecompanion-history",
+                ---Enable detailed logging for history extension
+                enable_logging = false,
+              }
             }
           }
-        }
-      })
-    end,
-
+        })
+      end,
+    }
   },
 })
 
@@ -1016,7 +1057,7 @@ vim.api.nvim_create_autocmd('BufWritePre', {
   group = vim.api.nvim_create_augroup('setGoFormatting', { clear = true }),
   pattern = '*.go',
   callback = function()
-    local params = vim.lsp.util.make_range_params()
+    local params = vim.lsp.util.make_range_params(nil, "utf-16")
     params.context = { only = { "source.organizeImports" } }
     local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 2000)
     for _, res in pairs(result or {}) do
@@ -1035,25 +1076,25 @@ vim.api.nvim_create_autocmd('BufWritePre', {
 
 -- Use LspAttach autocommand to only map the following keys
 -- after the language server attaches to the current buffer
-vim.api.nvim_create_autocmd('LspAttach', {
-  group = vim.api.nvim_create_augroup('UserLspConfig', {}),
-  callback = function(ev)
-    -- Buffer local mappings.
-    -- See `:help vim.lsp.*` for documentation on any of the below functions
-    local opts = { buffer = ev.buf }
-
-    vim.keymap.set('n', 'gd', "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
-    vim.keymap.set('n', '<leader>v', "<cmd>vsplit | lua vim.lsp.buf.definition()<CR>", opts)
-    vim.keymap.set('n', '<leader>s', "<cmd>belowright split | lua vim.lsp.buf.definition()<CR>", opts)
-    vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
-    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
-    vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
-    vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
-    vim.keymap.set('n', '<leader>cl', vim.lsp.codelens.run, opts)
-    vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
-    vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, opts)
-  end,
-})
+-- vim.api.nvim_create_autocmd('LspAttach', {
+--   group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+--   callback = function(ev)
+--     -- Buffer local mappings.
+--     -- See `:help vim.lsp.*` for documentation on any of the below functions
+--     local opts = { buffer = ev.buf }
+--
+--     vim.keymap.set('n', 'gd', "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
+--     vim.keymap.set('n', '<leader>v', "<cmd>vsplit | lua vim.lsp.buf.definition()<CR>", opts)
+--     vim.keymap.set('n', '<leader>s', "<cmd>belowright split | lua vim.lsp.buf.definition()<CR>", opts)
+--     vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+--     vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+--     vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+--     vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+--     vim.keymap.set('n', '<leader>cl', vim.lsp.codelens.run, opts)
+--     vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
+--     vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, opts)
+--   end,
+-- })
 
 -- Trouble
 vim.keymap.set("n", "<leader>xx", "<cmd>TroubleToggle<cr>", { silent = true, noremap = true })
@@ -1077,6 +1118,7 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_command('autocmd VimResized * wincmd =')
 vim.keymap.set("n", "<leader>ls", "<cmd>lua require(\"luasnip.loaders\").edit_snippet_files()<cr>",
   { silent = true, noremap = true })
+-- vim.lsp.set_log_level("debug")
 
 -- copilot config
 vim.keymap.set('i', '<C-J>', 'copilot#Accept("\\<CR>")', {
@@ -1085,6 +1127,18 @@ vim.keymap.set('i', '<C-J>', 'copilot#Accept("\\<CR>")', {
 })
 vim.g.copilot_no_tab_map = true
 vim.keymap.set('i', '<C-L>', '<Plug>(copilot-accept-word)')
+-- vim.api.nvim_set_hl(0, 'CopilotSuggestion', { fg = '#E3242B', ctermfg = 8 })
+
+-- folding
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "*", -- or "*" for all types
+  callback = function()
+    vim.opt_local.foldmethod     = "expr"
+    vim.opt_local.foldexpr       = "nvim_treesitter#foldexpr()"
+    vim.opt_local.foldlevelstart = 99
+    vim.opt.foldenable           = false
+  end,
+})
 
 -- yanky.nvim
 vim.keymap.set({ "n", "x" }, "p", "<Plug>(YankyPutAfter)")
@@ -1094,3 +1148,92 @@ vim.keymap.set({ "n", "x" }, "gP", "<Plug>(YankyGPutBefore)")
 
 vim.keymap.set("n", "<c-p>", "<Plug>(YankyPreviousEntry)")
 vim.keymap.set("n", "<c-n>", "<Plug>(YankyNextEntry)")
+
+-- lspconfig
+vim.lsp.config('jdtls', {
+  cmd = { os.getenv("HOME") .. '/.local/share/nvim/mason/bin/jdtls' },
+  filetypes = { 'java' },
+})
+vim.lsp.enable('jdtls')
+
+vim.lsp.config('yamlls', {
+  cmd = { os.getenv("HOME") .. '/.local/share/nvim/mason/bin/yaml-language-server', "--stdio" },
+  filetypes = { 'yaml' },
+  settings = {
+    yaml = {
+      schemas = {
+        ["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*",
+        ["../path/relative/to/file.yml"] = "/.github/workflows/*",
+        ["/path/from/root/of/project"] = "/.github/workflows/*",
+      },
+    },
+  },
+})
+vim.lsp.enable('yamlls')
+
+vim.lsp.config('kotlin_language_server', {
+  cmd = { os.getenv("HOME") .. '/.local/share/nvim/mason/bin/kotlin-language-server' },
+  filetypes = { 'kotlin' },
+})
+vim.lsp.enable('kotlin_language_server')
+
+vim.lsp.config('jsonls', {
+  cmd = { os.getenv("HOME") .. '/.local/share/nvim/mason/bin/vscode-json-language-server', "--stdio" },
+  filetypes = { 'json' },
+})
+vim.lsp.enable('jsonls')
+
+vim.lsp.config('lua_ls', {
+  cmd = { os.getenv("HOME") .. '/.local/share/nvim/mason/bin/lua-language-server' },
+  filetypes = { 'lua' },
+  root_markers = { '.luarc.json', '.luarc.jsonc' },
+  settings = {
+    Lua = {
+      diagnostics = {
+        enable = true,
+        globals = { "vim", "describe", "it", "before_each", "after_each", "teardown", "pending" }
+      },
+      hint = {
+        enable = true,
+        typeCoverage = true
+      },
+    },
+  },
+})
+vim.lsp.enable('lua_ls')
+
+vim.lsp.config('gopls', {
+  cmd = { os.getenv("HOME") .. '/.local/share/nvim/mason/bin/gopls' },
+  filetypes = { "go", "gomod", "gowork", "gohtml", "gotmpl", "go.html", "go.tmpl" },
+  root_markers = { 'go.mod' },
+  settings = {
+    gopls = {
+      usePlaceholders = true,
+      codelenses = {
+        gc_details = false,
+        generate = true,
+        regenerate_cgo = true,
+        run_govulncheck = true,
+        test = true,
+        tidy = true,
+        upgrade_dependency = true,
+        vendor = true,
+      },
+      experimentalPostfixCompletions = true,
+      completeUnimported = true,
+      staticcheck = true,
+      directoryFilters = { "-.git", "-node_modules" },
+      semanticTokens = true,
+      hints = {
+        assignVariableTypes = true,
+        compositeLiteralFields = true,
+        compositeLiteralTypes = true,
+        constantValues = true,
+        functionTypeParameters = true,
+        parameterNames = true,
+        rangeVariableTypes = true,
+      },
+    },
+  }
+})
+vim.lsp.enable('gopls')
