@@ -591,7 +591,10 @@ require("lazy").setup({
   },
 
   -- debugger
-  { "rcarriga/nvim-dap-ui",    requires = { "mfussenegger/nvim-dap" } },
+  {
+    "rcarriga/nvim-dap-ui",
+    dependencies = { "mfussenegger/nvim-dap" },
+  },
 
   -- java section
   {
