@@ -459,9 +459,11 @@ require("lazy").setup({
 
   -- sql
   {
-    "tpope/vim-dadbod",
-    "kristijanhusak/vim-dadbod-completion",
     "kristijanhusak/vim-dadbod-ui",
+    dependencies = {
+      "tpope/vim-dadbod",
+      "kristijanhusak/vim-dadbod-completion",
+    },
   },
 
   -- git
@@ -988,246 +990,6 @@ require("lazy").setup({
       })
     end
   },
-
-  { 'akinsho/toggleterm.nvim', version = "*", config = true },
-
-  {
-    "ryanmsnyder/toggleterm-manager.nvim",
-    dependencies = {
-      "akinsho/nvim-toggleterm.lua",
-      "nvim-telescope/telescope.nvim",
-      "nvim-lua/plenary.nvim", -- only needed because it's a dependency of telescope
-    },
-    config = true,
-  },
-
-  {
-
-    {
-      "Davidyz/VectorCode",
-      version = "*",                     -- optional, depending on whether you're on nightly or release
-      build = "pipx upgrade vectorcode", -- optional but recommended. This keeps your CLI up-to-date.
-      dependencies = { "nvim-lua/plenary.nvim" },
-    },
-    {
-      "olimorris/codecompanion.nvim",
-      dependencies = {
-        "nvim-lua/plenary.nvim",
-        "nvim-treesitter/nvim-treesitter",
-        "ravitemer/codecompanion-history.nvim",
-      },
-      config = function()
-        require("codecompanion").setup({
-          strategies = {
-            chat = {
-              adapter = {
-                name = "copilot",
-                -- model = "claude-sonnet-4",
-              },
-            },
-          },
-          prompt_library = {
-            ["EmailImprover"] = {
-              strategy = "chat",
-              description = "Please improve my german email.",
-              opts = {
-                short_name = "emailImprover",
-                auto_submit = true,
-                stop_context_insertion = false,
-              },
-              prompts = {
-                {
-                  role = "system",
-                  content = function(context)
-                    return
-                    "Act as a professional business communication expert. Enhance the following German email by adding easy-to-understand foreign words as synonyms where appropriate. Use short sentences, each with a maximum of 25 words. Avoid the subjunctive mood. Ensure the tone is assertive, confident, and authoritative."
-                  end,
-                },
-                {
-                  role = "user",
-                  content = function(context)
-                    return "Please write the new email:\n"
-                  end,
-                },
-              },
-            },
-            ["EmailToEnglish"] = {
-              strategy = "chat",
-              description = "Please translate into english and improve email.",
-              opts = {
-                short_name = "emailToEnglisch",
-                auto_submit = true,
-                stop_context_insertion = false,
-              },
-              prompts = {
-                {
-                  role = "system",
-                  content = function(context)
-                    return
-                    "Act as a professional business translator. Translate the following email into English. Enrich the translation with easy-to-understand synonyms and foreign words where appropriate. Use short sentences with a maximum of 25 words each. Avoid using the subjunctive mood. The tone must be assertive, confident, and professional, suitable for business communication. Present the translation in clear, well-structured English. "
-                  end,
-                },
-                {
-                  role = "user",
-                  content = function(context)
-                    return "Please write the new email:\n"
-                  end,
-                },
-              },
-            },
-            ["Summarize"] = {
-              strategy = "chat",
-              description = "Please summarize the following text.",
-              opts = {
-                short_name = "summarize",
-                auto_submit = true,
-                stop_context_insertion = false,
-              },
-              prompts = {
-                {
-                  role = "system",
-                  content = function(context)
-                    return
-                    "I want you to act as a professional technical writer. Please summarize the following text, focusing on clarity and conciseness. Present the summary in plain language using Markdown formatting."
-                  end,
-                },
-                {
-                  role = "user",
-                  content = function(context)
-                    return "Please summarize the following text:\n"
-                  end,
-                },
-              },
-            },
-            ["BetterNaming"] = {
-              strategy = "inline",
-              description = "Find better names",
-              opts = {
-                short_name = "naming",
-                auto_submit = true,
-                stop_context_insertion = false,
-              },
-              prompts = {
-                {
-                  role = "system",
-                  content = function(context)
-                    return
-                    "I want you to act as a naming expert and senior software developer. Please review the following code and suggest more descriptive and meaningful names for all variables and functions. For each suggested name, briefly explain why it is better. Then, provide the improved code with the new names applied. Use Markdown formatting and include the programming language name at the start of the code block."
-                  end,
-                },
-                {
-                  role = "user",
-                  content = function(context)
-                    return "<user_prompt>Please create better names</user_prompt>"
-                  end,
-                  opts = {
-                    contains_code = true,
-                  }
-                },
-              },
-            },
-            ["Swagger"] = {
-              strategy = "chat",
-              description = "Create a swagger ui description as YAML",
-              opts = {
-                short_name = "swagger",
-                auto_submit = true,
-                stop_context_insertion = false,
-              },
-              prompts = {
-                {
-                  role = "system",
-                  content = function(context)
-                    return
-                    "I want you to act as a software developer. Please generate a Swagger (OpenAPI 3.0) YAML specification for the selected Go HTTP server code. The documentation should include all endpoints, HTTP methods, response formats, and example responses. Output only the YAML content.\n"
-                  end,
-                },
-                {
-                  role = "user",
-                  content = function(context)
-                    return "Please create a swagger doc for\n\n"
-                  end,
-                  opts = {
-                    contains_code = true,
-                  }
-                },
-              },
-            },
-            ["Review"] = {
-              strategy = "chat",
-              description = "Make a review for the provided code",
-              opts = {
-                short_name = "review",
-                auto_submit = true,
-              },
-              prompts = {
-                {
-                  role = "system",
-                  content = function(context)
-                    local bufnr = vim.api.nvim_get_current_buf()
-                    local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-                    local code = table.concat(lines, "\n")
-
-                    return "I want you to act as a senior " ..
-                        context.filetype ..
-                        " developer. Please review the following code and provide suggestions for improvements regarding clarity, readability, and simplicity.\n" ..
-                        code .. "\n```\n\n"
-                  end,
-                },
-                {
-                  role = "user",
-                  content = function(context)
-                    return "Please review the code...\n"
-                  end,
-                  opts = {
-                    contains_code = true,
-                  }
-                },
-              },
-            },
-          },
-          extensions = {
-            vectorcode = {
-              opts = {
-                add_tool = true,
-              }
-            },
-            history = {
-              enabled = true,
-              opts = {
-                -- Keymap to open history from chat buffer (default: gh)
-                keymap = "gh",
-                -- Keymap to save the current chat manually (when auto_save is disabled)
-                save_chat_keymap = "sc",
-                -- Save all chats by default (disable to save only manually using 'sc')
-                auto_save = true,
-                -- Number of days after which chats are automatically deleted (0 to disable)
-                expiration_days = 0,
-                -- Picker interface (auto resolved to a valid picker)
-                picker = "telescope", --- ("telescope", "snacks", "fzf-lua", or "default")
-                ---Automatically generate titles for new chats
-                auto_generate_title = true,
-                title_generation_opts = {
-                  ---Adapter for generating titles (defaults to current chat adapter)
-                  adapter = "copilot",       -- "copilot"
-                  ---Model for generating titles (defaults to current chat model)
-                  model = "claude-sonnet-4", -- "gpt-4o"
-                },
-                ---On exiting and entering neovim, loads the last chat on opening chat
-                continue_last_chat = false,
-                ---When chat is cleared with `gx` delete the chat from history
-                delete_on_clearing_chat = false,
-                ---Directory path to save the chats
-                dir_to_save = vim.fn.stdpath("data") .. "/codecompanion-history",
-                ---Enable detailed logging for history extension
-                enable_logging = false,
-              }
-            }
-          }
-        })
-      end,
-    }
-  },
 })
 
 ----------------
@@ -1286,10 +1048,12 @@ vim.keymap.set("i", '<leader>w', '<C-o>:write!<CR>')
 vim.keymap.set("n", '<leader>q', ':q!<CR>', { silent = true })
 vim.keymap.set("i", '<leader>q', '<C-o>:q!<CR>', { silent = true })
 
--- Some useful quickfix shortcuts for quickfix
-vim.keymap.set('n', '<C-n>', '<cmd>cnext<CR>zz')
-vim.keymap.set('n', '<C-m>', '<cmd>cprev<CR>zz')
-vim.keymap.set('n', '<leader>a', '<cmd>cclose<CR>')
+-- Quickfix navigation (Alt-based to avoid conflict with yanky)
+vim.keymap.set('n', '<A-j>', '<cmd>cnext<CR>zz', { desc = "Next quickfix" })
+vim.keymap.set('n', '<A-k>', '<cmd>cprev<CR>zz', { desc = "Previous quickfix" })
+vim.keymap.set('n', '<A-J>', '<cmd>clast<CR>zz', { desc = "Last quickfix" })
+vim.keymap.set('n', '<A-K>', '<cmd>cfirst<CR>zz', { desc = "First quickfix" })
+vim.keymap.set('n', '<leader>a', '<cmd>cclose<CR>', { desc = "Close quickfix" })
 
 -- Exit mode in insert mode on jj
 vim.keymap.set('i', 'jj', '<ESC>')
@@ -1308,9 +1072,6 @@ vim.keymap.set('n', '<leader>gi', ':LazyGit<CR>')
 -- setup mapping for git
 vim.keymap.set("n", "<leader>gp", ":Gdiff<CR>", {})
 vim.keymap.set("n", "<leader>gb", ":G blame<CR>", {})
-
-vim.keymap.set("n", "<leader>cc", ":CodeCompanionChat toggle<CR>", {})
-vim.keymap.set("n", "<leader>co", ":CodeCompanionActions<CR>", {})
 
 -- Don't jump forward if I higlight and search for a word
 local function stay_star()
@@ -1362,10 +1123,6 @@ vim.keymap.set('t', '<ESC>', '<C-\\><C-n>')
 -- Open terminal in vertical and horizontal split
 vim.keymap.set('n', '<leader>tv', '<cmd>vnew term://zsh<CR>', { noremap = true })
 vim.keymap.set('n', '<leader>ts', '<cmd>split term://zsh<CR>', { noremap = true })
-
--- Open terminal in vertical and horizontal split, inside the terminal
-vim.keymap.set('t', '<leader>tv', '<c-w><cmd>vnew term://zsh<CR>', { noremap = true })
-vim.keymap.set('t', '<leader>ts', '<c-w><cmd>split term://zsh<CR>', { noremap = true })
 
 -- mappings to move out from terminal to other views
 vim.keymap.set('t', '<C-h>', '<C-\\><C-n><C-w>h')
@@ -1470,25 +1227,35 @@ vim.api.nvim_create_autocmd('BufWritePre', {
 
 -- Use LspAttach autocommand to only map the following keys
 -- after the language server attaches to the current buffer
--- vim.api.nvim_create_autocmd('LspAttach', {
---   group = vim.api.nvim_create_augroup('UserLspConfig', {}),
---   callback = function(ev)
---     -- Buffer local mappings.
---     -- See `:help vim.lsp.*` for documentation on any of the below functions
---     local opts = { buffer = ev.buf }
---
---     vim.keymap.set('n', 'gd', "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
---     vim.keymap.set('n', '<leader>v', "<cmd>vsplit | lua vim.lsp.buf.definition()<CR>", opts)
---     vim.keymap.set('n', '<leader>s', "<cmd>belowright split | lua vim.lsp.buf.definition()<CR>", opts)
---     vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
---     vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
---     vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
---     vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
---     vim.keymap.set('n', '<leader>cl', vim.lsp.codelens.run, opts)
---     vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
---     vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, opts)
---   end,
--- })
+vim.api.nvim_create_autocmd('LspAttach', {
+  group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+  callback = function(ev)
+    -- Buffer local mappings.
+    -- See `:help vim.lsp.*` for documentation on any of the below functions
+    local opts = { buffer = ev.buf, silent = true }
+    local fzf = require('fzf-lua')
+
+    -- Navigator-Ersatz: Definitionen & Referenzen mit Vorschau links
+    vim.keymap.set('n', 'gd', fzf.lsp_definitions, opts)
+    vim.keymap.set('n', 'gr', fzf.lsp_references, opts)
+    vim.keymap.set('n', '<leader>v', "<cmd>vsplit | lua vim.lsp.buf.definition()<CR>", opts)
+    vim.keymap.set('n', '<leader>s', "<cmd>belowright split | lua vim.lsp.buf.definition()<CR>", opts)
+    
+    -- Struktur-Suche innerhalb der aktuellen Java-Datei
+    vim.keymap.set('n', '<leader>ld', fzf.lsp_document_symbols, opts)
+    
+    -- Die "Google-Suche" für dein Java-Projekt (Methoden, Klassen, Enums)
+    vim.keymap.set('n', '<leader>lw', fzf.lsp_live_workspace_symbols, opts)
+
+    -- Code Actions & Refactoring
+    vim.keymap.set({ 'n', 'v' }, '<leader>ca', fzf.lsp_code_actions, opts)
+    vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
+    
+    -- Standard LSP Funktionen
+    vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+    vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+  end,
+})
 
 -- Trouble
 vim.keymap.set("n", "<leader>xx", "<cmd>TroubleToggle<cr>", { silent = true, noremap = true })
@@ -1542,6 +1309,29 @@ vim.keymap.set({ "n", "x" }, "gP", "<Plug>(YankyGPutBefore)")
 
 vim.keymap.set("n", "<c-p>", "<Plug>(YankyPreviousEntry)")
 vim.keymap.set("n", "<c-n>", "<Plug>(YankyNextEntry)")
+
+-- fzf-lua yanky history picker
+vim.keymap.set("n", "<leader>fy", function()
+  local yanky = require("yanky.history")
+  local fzf = require("fzf-lua")
+
+  local entries = {}
+  for _, entry in ipairs(yanky.all()) do
+    table.insert(entries, entry.regcontents)
+  end
+
+  fzf.fzf_exec(entries, {
+    prompt = "Yank History> ",
+    previewer = "builtin",
+    actions = {
+      ["default"] = function(selected)
+        if selected and selected[1] then
+          vim.api.nvim_put({selected[1]}, "c", true, true)
+        end
+      end,
+    },
+  })
+end, { desc = "Yank history picker" })
 
 -- lspconfig
 vim.lsp.config('jdtls', {
