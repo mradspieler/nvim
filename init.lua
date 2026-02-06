@@ -1198,7 +1198,6 @@ vim.api.nvim_create_autocmd('Filetype', {
   command = 'setlocal noexpandtab tabstop=4 shiftwidth=4'
 })
 
-
 -- Use LspAttach autocommand to only map the following keys
 -- after the language server attaches to the current buffer
 vim.api.nvim_create_autocmd('LspAttach', {
@@ -1211,7 +1210,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
     -- Navigator-Ersatz: Definitionen & Referenzen mit Vorschau links
     vim.keymap.set('n', 'gd', fzf.lsp_definitions, opts)
-    vim.keymap.set('n', 'gt', fzf.lsp_typedefs, opts) -- For JDK classes: String, Instant, etc.
     vim.keymap.set('n', 'gr', fzf.lsp_references, opts)
     vim.keymap.set('n', '<leader>v', "<cmd>vsplit | lua vim.lsp.buf.definition()<CR>", opts)
     vim.keymap.set('n', '<leader>s', "<cmd>belowright split | lua vim.lsp.buf.definition()<CR>", opts)
@@ -1458,6 +1456,16 @@ vim.api.nvim_create_autocmd("FileType", {
     local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
     local workspace_dir = vim.fn.stdpath('data') .. '/jdtls-workspace/' .. project_name
     
+    -- OS detection for jdtls config
+    local config_name = 'config_mac'
+    if vim.fn.has('mac') == 1 then
+      config_name = 'config_mac'
+    elseif vim.fn.has('unix') == 1 then
+      config_name = 'config_linux'
+    else
+      config_name = 'config_win'
+    end
+    
     local config = {
       cmd = {
         'java',
@@ -1471,7 +1479,7 @@ vim.api.nvim_create_autocmd("FileType", {
         '--add-opens', 'java.base/java.util=ALL-UNNAMED',
         '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
         '-jar', vim.fn.glob(jdtls_path .. '/plugins/org.eclipse.equinox.launcher_*.jar'),
-        '-configuration', jdtls_path .. '/config_mac',
+        '-configuration', jdtls_path .. '/' .. config_name,
         '-data', workspace_dir,
       },
       root_dir = jdtls.setup.find_root({'.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle', 'build.gradle.kts'}),
@@ -1492,9 +1500,21 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = "*.java",
   callback = function()
-    vim.lsp.buf.code_action({
+    local params = {
       context = { only = { "source.organizeImports" } },
       apply = true,
-    })
+    }
+    local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 1000)
+    if result then
+      for _, res in pairs(result) do
+        if res.result then
+          for _, action in pairs(res.result) do
+            if action.edit then
+              vim.lsp.util.apply_workspace_edit(action.edit, "utf-8")
+            end
+          end
+        end
+      end
+    end
   end,
 })
