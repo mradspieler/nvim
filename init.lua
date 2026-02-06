@@ -1204,9 +1204,14 @@ vim.keymap.set('n', '<leader>dp', vim.diagnostic.goto_prev)
 vim.keymap.set('n', '<leader>dn', vim.diagnostic.goto_next)
 vim.keymap.set('n', '<leader>ds', vim.diagnostic.setqflist)
 
--- disable diagnostics, I didn't like them
-vim.lsp.handlers["textDocument/publishDiagnostics"] = function()
-end
+-- Configure diagnostics display (no inline text, but show signs and underlines)
+vim.diagnostic.config({
+  virtual_text = false,      -- No inline text noise
+  signs = true,              -- Show icons in gutter
+  underline = true,          -- Underline errors/warnings
+  severity_sort = true,      -- Errors before warnings
+  update_in_insert = false,  -- Only update in normal mode
+})
 
 -- Go uses gofmt, which uses tabs for indentation and spaces for aligment.
 -- Hence override our indentation rules.
