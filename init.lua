@@ -1144,9 +1144,12 @@ vim.keymap.set("n", "gx", '<Cmd>call jobstart(["open", expand("<cfile>")], {"det
 vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter", "TermOpen" }, {
   group = vim.api.nvim_create_augroup("openTermInsert", {}),
   callback = function(args)
-    -- we don't use vim.startswith() and look for test:// because of vim-test
-    -- vim-test starts tests in a terminal, which we want to keep in normal mode
-    if vim.endswith(vim.api.nvim_buf_get_name(args.buf), "zsh") then
+    local bufname = vim.api.nvim_buf_get_name(args.buf)
+    -- Auto-insert for interactive shells (zsh), but NOT for vim-test terminals
+    -- Also auto-insert for build tools (mvn, gradle) to enable auto-scrolling
+    if vim.endswith(bufname, "zsh") or 
+       bufname:match("mvn") or 
+       bufname:match("gradle") then
       vim.cmd("startinsert")
     end
   end,
@@ -1182,16 +1185,18 @@ vim.keymap.set('n', '<leader>tt', ':write!<CR>:GoAlt!<CR>', { noremap = true, si
 vim.keymap.set('n', '<leader>gc', ':GoCoverage<CR>', { desc = "Go coverage" })
 vim.keymap.set('n', '<leader>gC', ':GoCoverageClear<CR>', { desc = "Clear coverage" })
 
--- telescope
-local builtin = require('telescope.builtin')
-vim.keymap.set('n', '<leader>gf', builtin.git_files, {})
-vim.keymap.set('n', '<leader>ff', function() builtin.find_files({ cwd = vim.g.mycwd }) end, {})
-vim.keymap.set('n', '<leader>ld', builtin.lsp_document_symbols, {})
-vim.keymap.set('n', '<leader>td', builtin.diagnostics, {})
-vim.keymap.set('n', '<leader>gs', builtin.grep_string, {})
-vim.keymap.set('n', '<leader>lg', builtin.live_grep, {})
-vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
-vim.keymap.set('n', '<leader>fh', builtin.command_history, {})
+-- fzf-lua
+-- project navigation
+vim.keymap.set('n', '<leader>gf', ':FzfLua git_files<CR>', {})
+vim.keymap.set('n', '<leader>ff', ':FzfLua files<CR>', {})
+vim.keymap.set('n', '<leader>fb', ':FzfLua buffers<CR>', {})
+-- search
+vim.keymap.set('n', '<leader>gs', ':FzfLua grep_project<CR>', {})
+vim.keymap.set('n', '<leader>lg', ':FzfLua live_grep<CR>', {})
+-- diagnostic
+vim.keymap.set('n', '<leader>td', ':FzfLua diagnostics_workspace<CR>', {})
+-- history
+vim.keymap.set('n', '<leader>fh', ':FzfLua command_history<CR>', {})
 
 -- diagnostics
 vim.keymap.set('n', '<leader>do', vim.diagnostic.open_float)
