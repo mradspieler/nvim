@@ -1455,7 +1455,7 @@ vim.api.nvim_create_autocmd("FileType", {
     local jdtls_path = os.getenv("HOME") .. '/.local/share/nvim/mason/packages/jdtls'
     local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
     local workspace_dir = vim.fn.stdpath('data') .. '/jdtls-workspace/' .. project_name
-    
+
     -- OS detection for jdtls config
     local config_name = 'config_mac'
     if vim.fn.has('mac') == 1 then
@@ -1465,7 +1465,7 @@ vim.api.nvim_create_autocmd("FileType", {
     else
       config_name = 'config_win'
     end
-    
+
     local config = {
       cmd = {
         'java',
@@ -1488,10 +1488,27 @@ vim.api.nvim_create_autocmd("FileType", {
           eclipse = { downloadSources = true },
           maven = { downloadSources = true },
           contentProvider = { preferred = 'fernflower' },
+          -- Completion filtering - exclude internal/generated classes
+          completion = {
+            filteredTypes = {
+              "com.sun.*",
+              "sun.*",
+              "jdk.internal.*",
+              "org.graalvm.*",
+              "io.micrometer.shaded.*",
+            },
+          },
+          -- Import ordering: java → javax → com → org
+          imports = {
+            order = { "java", "javax", "com", "org" },
+          },
+          inlayHints = {
+            parameterNames = { enabled = "all" },
+          },
         },
       },
     }
-    
+
     jdtls.start_or_attach(config)
   end,
 })
