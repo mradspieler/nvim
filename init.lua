@@ -564,6 +564,12 @@ require("lazy").setup({
 
   { 'neovim/nvim-lspconfig' },
 
+  -- nvim-jdtls for proper Java support (handles source attachments correctly)
+  {
+    'mfussenegger/nvim-jdtls',
+    ft = 'java',
+  },
+
   {
     "ray-x/go.nvim",
     dependencies = { -- optional packages
@@ -596,26 +602,12 @@ require("lazy").setup({
     dependencies = { "mfussenegger/nvim-dap" },
   },
 
-  -- java section
+  -- Mason for LSP server management
   {
-    'nvim-java/nvim-java',
-    dependencies = {
-      'nvim-java/lua-async-await',
-      'nvim-java/nvim-java-core',
-      'nvim-java/nvim-java-test',
-      'nvim-java/nvim-java-dap',
-      'MunifTanjim/nui.nvim',
-      'mfussenegger/nvim-dap',
-      {
-        'mason-org/mason.nvim',
-        opts = {
-          registries = {
-            'github:nvim-java/mason-registry',
-            'github:mason-org/mason-registry',
-          },
-        },
-      }
-    },
+    'williamboman/mason.nvim',
+    config = function()
+      require('mason').setup()
+    end,
   },
 
   {
@@ -1206,27 +1198,6 @@ vim.api.nvim_create_autocmd('Filetype', {
   command = 'setlocal noexpandtab tabstop=4 shiftwidth=4'
 })
 
--- Run gofmt/gofmpt, import packages automatically on save
-vim.api.nvim_create_autocmd('BufWritePre', {
-  group = vim.api.nvim_create_augroup('setGoFormatting', { clear = true }),
-  pattern = '*.go',
-  callback = function()
-    local params = vim.lsp.util.make_range_params(nil, "utf-16")
-    params.context = { only = { "source.organizeImports" } }
-    local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 2000)
-    for _, res in pairs(result or {}) do
-      for _, r in pairs(res.result or {}) do
-        if r.edit then
-          vim.lsp.util.apply_workspace_edit(r.edit, "utf-16")
-        else
-          vim.lsp.buf.execute_command(r.command)
-        end
-      end
-    end
-
-    vim.lsp.buf.format()
-  end
-})
 
 -- Use LspAttach autocommand to only map the following keys
 -- after the language server attaches to the current buffer
@@ -1240,6 +1211,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
     -- Navigator-Ersatz: Definitionen & Referenzen mit Vorschau links
     vim.keymap.set('n', 'gd', fzf.lsp_definitions, opts)
+    vim.keymap.set('n', 'gt', fzf.lsp_typedefs, opts) -- For JDK classes: String, Instant, etc.
     vim.keymap.set('n', 'gr', fzf.lsp_references, opts)
     vim.keymap.set('n', '<leader>v', "<cmd>vsplit | lua vim.lsp.buf.definition()<CR>", opts)
     vim.keymap.set('n', '<leader>s', "<cmd>belowright split | lua vim.lsp.buf.definition()<CR>", opts)
@@ -1329,7 +1301,7 @@ vim.keymap.set("n", "<leader>fy", function()
     actions = {
       ["default"] = function(selected)
         if selected and selected[1] then
-          vim.api.nvim_put({selected[1]}, "c", true, true)
+          vim.api.nvim_put({ selected[1] }, "c", true, true)
         end
       end,
     },
@@ -1337,11 +1309,63 @@ vim.keymap.set("n", "<leader>fy", function()
 end, { desc = "Yank history picker" })
 
 -- lspconfig
-vim.lsp.config('jdtls', {
+vim.lsp.config("jdtls", {
   cmd = { os.getenv("HOME") .. '/.local/share/nvim/mason/bin/jdtls' },
   filetypes = { 'java' },
+  settings = {
+    java = {
+      -- 1. CLEANER COMPLETIONS
+      completion = {
+        -- Don't suggest these types (prevents picking the wrong 'List' or 'Column')
+        filteredTypes = {
+          "com.sun.*",
+          "sun.*",
+          "org.graalvm.*",
+          "java.awt.*",
+          "jdk.*",
+        },
+        -- Static imports are added automatically when you pick these from the list
+        favoriteStaticMembers = {
+          "org.junit.jupiter.api.Assertions.*",
+          "org.junit.jupiter.api.Assumptions.*",
+          "org.mockito.Mockito.*",
+          "org.hamcrest.Matchers.*",
+          "org.hamcrest.MatcherAssert.assertThat",
+        },
+        -- Forces the import order to match standard Google/IntelliJ conventions
+        importOrder = {
+          "java",
+          "javax",
+          "com",
+          "org"
+        },
+      },
+
+      -- 2. BETTER CODE CONTEXT (Inlay Hints)
+      -- Shows parameter names in method calls: save(user /* name */, true /* force */)
+      inlayHints = {
+        parameterNames = {
+          enabled = "all", -- options: "none", "literals", "all"
+        },
+      },
+
+      -- 3. SMART SOURCE NAVIGATION
+      sources = {
+        organizeImports = {
+          starThreshold = 99, -- Prevents converting imports to '*' too early
+        },
+      },
+
+      -- 4. CODE EXECUTION & QUALITY
+      signatureHelp = { enabled = true },
+      contentProvider = { preferred = 'fernflower' },
+      saveActions = {
+        organizeImports = true,
+      },
+    },
+  },
 })
-vim.lsp.enable('jdtls')
+vim.lsp.enable("jdtls")
 
 vim.lsp.config('yamlls', {
   cmd = { os.getenv("HOME") .. '/.local/share/nvim/mason/bin/yaml-language-server', "--stdio" },
@@ -1424,3 +1448,53 @@ vim.lsp.config('gopls', {
   }
 })
 vim.lsp.enable('gopls')
+
+-- jdtls setup with nvim-jdtls (handles source attachments for JDK classes)
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "java",
+  callback = function()
+    local jdtls = require('jdtls')
+    local jdtls_path = os.getenv("HOME") .. '/.local/share/nvim/mason/packages/jdtls'
+    local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
+    local workspace_dir = vim.fn.stdpath('data') .. '/jdtls-workspace/' .. project_name
+    
+    local config = {
+      cmd = {
+        'java',
+        '-Declipse.application=org.eclipse.jdt.ls.core.id1',
+        '-Dosgi.bundles.defaultStartLevel=4',
+        '-Declipse.product=org.eclipse.jdt.ls.core.product',
+        '-Dlog.protocol=true',
+        '-Dlog.level=ALL',
+        '-Xmx1g',
+        '--add-modules=ALL-SYSTEM',
+        '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '-jar', vim.fn.glob(jdtls_path .. '/plugins/org.eclipse.equinox.launcher_*.jar'),
+        '-configuration', jdtls_path .. '/config_mac',
+        '-data', workspace_dir,
+      },
+      root_dir = jdtls.setup.find_root({'.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle', 'build.gradle.kts'}),
+      settings = {
+        java = {
+          eclipse = { downloadSources = true },
+          maven = { downloadSources = true },
+          contentProvider = { preferred = 'fernflower' },
+        },
+      },
+    }
+    
+    jdtls.start_or_attach(config)
+  end,
+})
+
+-- Auto-organize imports on save for Java (similar to Go's goimport)
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*.java",
+  callback = function()
+    vim.lsp.buf.code_action({
+      context = { only = { "source.organizeImports" } },
+      apply = true,
+    })
+  end,
+})
