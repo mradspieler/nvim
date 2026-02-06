@@ -611,6 +611,17 @@ require("lazy").setup({
   },
 
   {
+    'williamboman/mason-lspconfig.nvim',
+    dependencies = { 'williamboman/mason.nvim' },
+    config = function()
+      require('mason-lspconfig').setup({
+        ensure_installed = { 'gopls', 'jdtls', 'lua_ls', 'jsonls', 'yamlls', 'kotlin_language_server' },
+        automatic_installation = true,
+      })
+    end,
+  },
+
+  {
     "folke/trouble.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {}, -- for default options, refer to the configuration section for custom setup.
@@ -1168,6 +1179,8 @@ vim.keymap.set('n', '<leader>r', ':write!<CR>:GoRun -F<CR>')
 vim.keymap.set('n', '<leader>t', ':write!<CR>:GoTest -n<CR>')
 vim.keymap.set('n', '<leader>gv', ':write!<CR>:GoAltV!<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<leader>tt', ':write!<CR>:GoAlt!<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>gc', ':GoCoverage<CR>', { desc = "Go coverage" })
+vim.keymap.set('n', '<leader>gC', ':GoCoverageClear<CR>', { desc = "Clear coverage" })
 
 -- telescope
 local builtin = require('telescope.builtin')
@@ -1366,7 +1379,6 @@ vim.lsp.config("jdtls", {
 vim.lsp.enable("jdtls")
 
 vim.lsp.config('yamlls', {
-  cmd = { os.getenv("HOME") .. '/.local/share/nvim/mason/bin/yaml-language-server', "--stdio" },
   filetypes = { 'yaml' },
   settings = {
     yaml = {
@@ -1381,19 +1393,16 @@ vim.lsp.config('yamlls', {
 vim.lsp.enable('yamlls')
 
 vim.lsp.config('kotlin_language_server', {
-  cmd = { os.getenv("HOME") .. '/.local/share/nvim/mason/bin/kotlin-language-server' },
   filetypes = { 'kotlin' },
 })
 vim.lsp.enable('kotlin_language_server')
 
 vim.lsp.config('jsonls', {
-  cmd = { os.getenv("HOME") .. '/.local/share/nvim/mason/bin/vscode-json-language-server', "--stdio" },
   filetypes = { 'json' },
 })
 vim.lsp.enable('jsonls')
 
 vim.lsp.config('lua_ls', {
-  cmd = { os.getenv("HOME") .. '/.local/share/nvim/mason/bin/lua-language-server' },
   filetypes = { 'lua' },
   root_markers = { '.luarc.json', '.luarc.jsonc' },
   settings = {
@@ -1412,7 +1421,6 @@ vim.lsp.config('lua_ls', {
 vim.lsp.enable('lua_ls')
 
 vim.lsp.config('gopls', {
-  cmd = { os.getenv("HOME") .. '/.local/share/nvim/mason/bin/gopls' },
   filetypes = { "go", "gomod", "gowork", "gohtml", "gotmpl", "go.html", "go.tmpl" },
   root_markers = { 'go.mod' },
   settings = {
@@ -1513,25 +1521,12 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- Auto-organize imports on save for Java (similar to Go's goimport)
 vim.api.nvim_create_autocmd("BufWritePre", {
-  pattern = "*.java",
+  pattern = {  "*.java" },
   callback = function()
-    local params = {
+    vim.lsp.buf.code_action({
       context = { only = { "source.organizeImports" } },
       apply = true,
-    }
-    local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 1000)
-    if result then
-      for _, res in pairs(result) do
-        if res.result then
-          for _, action in pairs(res.result) do
-            if action.edit then
-              vim.lsp.util.apply_workspace_edit(action.edit, "utf-8")
-            end
-          end
-        end
-      end
-    end
+    })
   end,
 })
