@@ -624,6 +624,7 @@ require("lazy").setup({
           args = { "dap", "-l", "127.0.0.1:${port}" },
         },
       }
+      dap.adapters.java = {}
 
       vim.keymap.set("n", "<space>b", dap.toggle_breakpoint)
       vim.keymap.set("n", "<space>gb", dap.run_to_cursor)
@@ -1303,6 +1304,12 @@ vim.api.nvim_create_autocmd('LspAttach', {
     -- Standard LSP Funktionen
     vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
     vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+
+    -- Java-specific debugging keybindings
+    if vim.bo.filetype == 'java' then
+      vim.keymap.set('n', '<leader>df', "<cmd>lua require('jdtls').test_class()<CR>", { buffer = ev.buf, desc = "Debug test class" })
+      vim.keymap.set('n', '<leader>dn', "<cmd>lua require('jdtls').test_nearest_method()<CR>", { buffer = ev.buf, desc = "Debug nearest test method" })
+    end
   end,
 })
 
@@ -1518,71 +1525,59 @@ vim.lsp.config('gopls', {
 })
 vim.lsp.enable('gopls')
 
--- jdtls setup with nvim-jdtls (handles source attachments for JDK classes)
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "java",
-  callback = function()
-    local jdtls = require('jdtls')
-    local jdtls_path = os.getenv("HOME") .. '/.local/share/nvim/mason/packages/jdtls'
-    local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
-    local workspace_dir = vim.fn.stdpath('data') .. '/jdtls-workspace/' .. project_name
+-- JDTLS setup
+local jdtls_path = os.getenv("HOME") .. '/.local/share/nvim/mason/packages/jdtls'
+local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
+local workspace_dir = vim.fn.stdpath('data') .. '/jdtls-workspace/' .. project_name
+-- OS detection for jdtls config
+local config_name = 'config_mac_arm'
 
-    -- OS detection for jdtls config
-    local config_name = 'config_mac'
-    if vim.fn.has('mac') == 1 then
-      config_name = 'config_mac'
-    elseif vim.fn.has('unix') == 1 then
-      config_name = 'config_linux'
-    else
-      config_name = 'config_win'
-    end
-
-    local config = {
-      cmd = {
-        'java',
-        '-Declipse.application=org.eclipse.jdt.ls.core.id1',
-        '-Dosgi.bundles.defaultStartLevel=4',
-        '-Declipse.product=org.eclipse.jdt.ls.core.product',
-        '-Dlog.protocol=true',
-        '-Dlog.level=ALL',
-        '-Xmx1g',
-        '--add-modules=ALL-SYSTEM',
-        '--add-opens', 'java.base/java.util=ALL-UNNAMED',
-        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
-        '-jar', vim.fn.glob(jdtls_path .. '/plugins/org.eclipse.equinox.launcher_*.jar'),
-        '-configuration', jdtls_path .. '/' .. config_name,
-        '-data', workspace_dir,
-      },
-      root_dir = jdtls.setup.find_root({'.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle', 'build.gradle.kts'}),
-      settings = {
-        java = {
-          eclipse = { downloadSources = true },
-          maven = { downloadSources = true },
-          contentProvider = { preferred = 'fernflower' },
-          -- Completion filtering - exclude internal/generated classes
-          completion = {
-            filteredTypes = {
-              "com.sun.*",
-              "sun.*",
-              "jdk.internal.*",
-              "org.graalvm.*",
-              "io.micrometer.shaded.*",
-            },
-          },
-          -- Import ordering: java → javax → com → org
-          imports = {
-            order = { "java", "javax", "com", "org" },
-          },
-          inlayHints = {
-            parameterNames = { enabled = "all" },
-          },
+vim.lsp.config('jdtls', {
+  filetypes = { "java", "jsp" },
+  root_markers = {'.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle', 'build.gradle.kts'},
+  cmd = {
+    'java',
+    '-Declipse.application=org.eclipse.jdt.ls.core.id1',
+    '-Dosgi.bundles.defaultStartLevel=4',
+    '-Declipse.product=org.eclipse.jdt.ls.core.product',
+    '-Dlog.protocol=true',
+    '-Dlog.level=ALL',
+    '-Xmx2g',
+    '--add-modules=ALL-SYSTEM',
+    '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+    '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+    '-jar', vim.fn.glob(jdtls_path .. '/plugins/org.eclipse.equinox.launcher_*.jar'),
+    '-configuration', jdtls_path .. '/' .. config_name,
+    '-data', workspace_dir,
+  },
+  settings = {
+    java = {
+      eclipse = { downloadSources = true },
+      maven = { downloadSources = true },
+      contentProvider = { preferred = 'fernflower' },
+      signatureHelp = { enabled = true },
+      implementationsCodeLens = { enabled = true },
+      -- Completion filtering - exclude internal/generated classes
+      completion = {
+        filteredTypes = {
+          "com.sun.*",
+          "sun.*",
+          "jdk.internal.*",
+          "org.graalvm.*",
+          "io.micrometer.shaded.*",
         },
       },
-    }
-
-    jdtls.start_or_attach(config)
-  end,
+      -- Import ordering: java → javax → com → org
+      imports = {
+        order = { "java", "javax", "com", "org" },
+      },
+      inlayHints = {
+        parameterNames = { enabled = "all" },
+      },
+    },
+  },
 })
+vim.lsp.enable('jdtls')
 
 vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = {  "*.java" },
