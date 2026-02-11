@@ -568,6 +568,113 @@ require("lazy").setup({
   {
     'mfussenegger/nvim-jdtls',
     ft = 'java',
+    root_markers = {'.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle', 'build.gradle.kts'},
+
+    settings = {
+      java = {
+        eclipse = { downloadSources = true },
+        maven = { downloadSources = true },
+        contentProvider = { preferred = 'fernflower' },
+        signatureHelp = { enabled = true },
+        implementationsCodeLens = { enabled = true },
+        -- Completion filtering - exclude internal/generated classes
+        completion = {
+          filteredTypes = {
+            "com.sun.*",
+            "sun.*",
+            "jdk.internal.*",
+            "org.graalvm.*",
+            "io.micrometer.shaded.*",
+          },
+        },
+        -- Import ordering: java → javax → com → org
+        imports = {
+          order = { "java", "javax", "com", "org" },
+        },
+        inlayHints = {
+          parameterNames = { enabled = "all" },
+        },
+      }
+    },
+
+    config = function()
+      -- Wird jedes Mal ausgeführt, wenn eine .java Datei geöffnet wird
+      local jdtls = require("jdtls")
+      -- Pfad zu jdtls (am besten über mason)
+
+      local jdtls_path = os.getenv("HOME") .. '/.local/share/nvim/mason/packages/jdtls'
+      -- local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
+      -- local workspace_dir = vim.fn.stdpath('data') .. '/jdtls-workspace/' .. project_name
+
+      local config = {
+
+        cmd = {
+          "java",
+          "-Declipse.application=org.eclipse.jdt.ls.core.id1",
+          "-Dosgi.bundles.defaultStartLevel=4",
+          "-Declipse.product=org.eclipse.jdt.ls.core.product",
+          "-Dlog.protocol=true",
+          "-Dlog.level=ALL",
+          "-Xmx2g",
+          "--add-modules=ALL-SYSTEM",
+          "--add-opens", "java.base/java.util=ALL-UNNAMED",
+          "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+          "-javaagent:" .. jdtls_path .. "/lombok.jar",
+          "-jar", vim.fn.glob(jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar"),
+          "-configuration", jdtls_path .. "/config_" .. (vim.fn.has("mac") == 1 and "mac" or "linux"),
+          "-data", vim.fn.stdpath("cache") .. "/jdtls/workspace/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t"),
+        },
+
+        root_dir = jdtls.setup.find_root({ ".git", "mvnw", "gradlew", "pom.xml", "build.gradle" }),
+
+        -- init_options ist wichtig für DAP/Debugging Support
+        init_options = {
+          bundles = vim.list_extend(
+            -- java-debug extension für DAP
+            vim.split(vim.fn.glob(os.getenv("HOME") .. "/.local/share/nvim/mason/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar", 1), "\n"),
+            -- java-test extension für Test-Debugging
+            vim.split(vim.fn.glob(os.getenv("HOME") .. "/.local/share/nvim/mason/packages/java-test/extension/server/*.jar", 1), "\n")
+          )
+        },
+
+        settings = {
+          java = {
+            eclipse = { downloadSources = true },
+            maven = { downloadSources = true },
+            references = { includeDecompiledSources = true },
+            referencesCodeLens = { enabled = true },
+
+            inlayHints = {
+              parameterNames = { enabled = "all" },
+            },
+
+            format = {
+              enabled = true,
+              --settings = { url = "... dein google-style.xml oder so ..." },
+            },
+          },
+        },
+
+        -- Wichtig für gute Performance & Features
+        capabilities = require("cmp_nvim_lsp").default_capabilities(),
+
+        on_attach = function(client, bufnr)
+          -- Deine normalen on_attach Dinge (keymaps etc.)
+          -- z. B. require("lspconfig").util.default_on_attach(client, bufnr)
+          -- JDTLS-spezifische Befehle / extended capabilities
+          jdtls.extendedClientCapabilities = jdtls.extendedClientCapabilities
+          require("jdtls.setup").add_commands()           -- fügt :JdtCompile, :JdtShowLogs etc. hinzu
+
+          -- WICHTIG: DAP-Setup für Java-Debugging
+          require('jdtls').setup_dap({ hotcodereplace = 'auto' })
+          require('jdtls.dap').setup_dap_main_class_configs()
+        end,
+      }
+
+      -- Starte oder verbinde
+      jdtls.start_or_attach(config)
+    end,
+
   },
 
   {
@@ -615,16 +722,44 @@ require("lazy").setup({
 
       require("nvim-dap-virtual-text").setup {}
 
-      -- Handled by nvim-dap-go
-      dap.adapters.go = {
-        type = "server",
-        port = "${port}",
-        executable = {
-          command = "dlv",
-          args = { "dap", "-l", "127.0.0.1:${port}" },
+      -- Java DAP adapter wird von nvim-jdtls automatisch registriert via setup_dap()
+      -- Konfigurationen für verschiedene Java Debug-Szenarien
+      dap.configurations.java = {
+        {
+          name = "Debug Launch (2GB)";
+          type = 'java';
+          request = 'launch';
+          vmArgs = "" ..
+          "-Xmx2g "
+        },
+        {
+          name = "Debug Attach (5005)";
+          type = 'java';
+          request = 'attach';
+          hostName = "127.0.0.1";
+          port = 5005;
+        },
+        {
+          name = "My Custom Java Run Configuration",
+          type = "java",
+          request = "launch",
+          -- You need to extend the classPath to list your dependencies.
+          -- `nvim-jdtls` would automatically add the `classPaths` property if it is missing
+          -- classPaths = {},
+
+          -- If using multi-module projects, remove otherwise.
+          -- projectName = "yourProjectName",
+
+          -- javaExec = "java",
+          mainClass = "com.example.App",
+
+          -- If using the JDK9+ module system, this needs to be extended
+          -- `nvim-jdtls` would automatically populate this property
+          -- modulePaths = {},
+          -- vmArgs = "" ..
+          --   "-Xmx2g "
         },
       }
-      dap.adapters.java = {}
 
       vim.keymap.set("n", "<space>b", dap.toggle_breakpoint)
       vim.keymap.set("n", "<space>gb", dap.run_to_cursor)
@@ -669,9 +804,31 @@ require("lazy").setup({
     dependencies = { 'williamboman/mason.nvim' },
     config = function()
       require('mason-lspconfig').setup({
-        ensure_installed = { 'gopls', 'jdtls', 'lua_ls', 'jsonls', 'yamlls', 'kotlin_language_server' },
+        ensure_installed = { 
+          'gopls', 
+          'jdtls', 
+          'lua_ls', 
+          'jsonls', 
+          'yamlls', 
+          'kotlin_language_server' 
+        },
         automatic_installation = true,
       })
+
+      -- Ensure Java debugging tools are installed
+      local mason_registry = require("mason-registry")
+      local packages_to_install = {
+        "java-debug-adapter",
+        "java-test"
+      }
+
+      for _, pkg_name in ipairs(packages_to_install) do
+        local pkg = mason_registry.get_package(pkg_name)
+        if not pkg:is_installed() then
+          vim.notify("Installing " .. pkg_name, vim.log.levels.INFO)
+          pkg:install()
+        end
+      end
     end,
   },
 
@@ -905,8 +1062,8 @@ require("lazy").setup({
         unpack = unpack or table.unpack
         local line, col = unpack(vim.api.nvim_win_get_cursor(0))
         return col ~= 0 and
-          vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") ==
-          nil
+        vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") ==
+        nil
       end
 
       require('cmp').setup({
@@ -1334,7 +1491,7 @@ vim.api.nvim_create_autocmd("FileType", {
 -- automatically resize all vim buffers if I resize the terminal window
 vim.api.nvim_command('autocmd VimResized * wincmd =')
 vim.keymap.set("n", "<leader>ls", "<cmd>lua require(\"luasnip.loaders\").edit_snippet_files()<cr>",
-  { silent = true, noremap = true })
+{ silent = true, noremap = true })
 -- vim.lsp.set_log_level("debug")
 
 -- copilot config
@@ -1524,60 +1681,6 @@ vim.lsp.config('gopls', {
   }
 })
 vim.lsp.enable('gopls')
-
--- JDTLS setup
-local jdtls_path = os.getenv("HOME") .. '/.local/share/nvim/mason/packages/jdtls'
-local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
-local workspace_dir = vim.fn.stdpath('data') .. '/jdtls-workspace/' .. project_name
--- OS detection for jdtls config
-local config_name = 'config_mac_arm'
-
-vim.lsp.config('jdtls', {
-  filetypes = { "java", "jsp" },
-  root_markers = {'.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle', 'build.gradle.kts'},
-  cmd = {
-    'java',
-    '-Declipse.application=org.eclipse.jdt.ls.core.id1',
-    '-Dosgi.bundles.defaultStartLevel=4',
-    '-Declipse.product=org.eclipse.jdt.ls.core.product',
-    '-Dlog.protocol=true',
-    '-Dlog.level=ALL',
-    '-Xmx2g',
-    '--add-modules=ALL-SYSTEM',
-    '--add-opens', 'java.base/java.util=ALL-UNNAMED',
-    '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
-    '-jar', vim.fn.glob(jdtls_path .. '/plugins/org.eclipse.equinox.launcher_*.jar'),
-    '-configuration', jdtls_path .. '/' .. config_name,
-    '-data', workspace_dir,
-  },
-  settings = {
-    java = {
-      eclipse = { downloadSources = true },
-      maven = { downloadSources = true },
-      contentProvider = { preferred = 'fernflower' },
-      signatureHelp = { enabled = true },
-      implementationsCodeLens = { enabled = true },
-      -- Completion filtering - exclude internal/generated classes
-      completion = {
-        filteredTypes = {
-          "com.sun.*",
-          "sun.*",
-          "jdk.internal.*",
-          "org.graalvm.*",
-          "io.micrometer.shaded.*",
-        },
-      },
-      -- Import ordering: java → javax → com → org
-      imports = {
-        order = { "java", "javax", "com", "org" },
-      },
-      inlayHints = {
-        parameterNames = { enabled = "all" },
-      },
-    },
-  },
-})
-vim.lsp.enable('jdtls')
 
 vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = {  "*.java" },
