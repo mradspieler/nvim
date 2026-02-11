@@ -562,8 +562,6 @@ require("lazy").setup({
     dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
   },
 
-  { 'neovim/nvim-lspconfig' },
-
   -- nvim-jdtls for proper Java support (handles source attachments correctly)
   {
     'mfussenegger/nvim-jdtls',
@@ -651,6 +649,10 @@ require("lazy").setup({
             format = {
               enabled = true,
               --settings = { url = "... dein google-style.xml oder so ..." },
+            },
+
+            symbols = {
+              includeSourceMethodDeclarations = true,
             },
           },
         },
@@ -892,6 +894,7 @@ require("lazy").setup({
         -- 3. Pfad-Kürzung erzwingen
         files = {
           path_shorten = 1,
+          -- fd_opts = "--color=never --type f --hidden --follow --exclude .git --exclude '*.class' --exclude '*.exe'",
         },
 
         -- 4. Speziell für LSP (Referenzen, Definitionen)
@@ -1254,10 +1257,22 @@ vim.g.mapleader = ','
 vim.g.mycwd = vim.fn.getcwd()
 
 -- json formatting
-vim.keymap.set("n", "<leader>jq", "<cmd>:%!jq .<CR>")
+vim.keymap.set("n", "<leader>jq", function()
+  if vim.fn.executable("jq") == 0 then
+    vim.notify("jq not installed", vim.log.levels.ERROR)
+    return
+  end
+  vim.cmd(":%!jq .")
+end, { desc = "Format JSON with jq" })
 
 -- sql formatting
-vim.keymap.set("n", "<leader>sq", "<cmd>:%!pg_format --spaces 2 --function-case 2<CR>")
+vim.keymap.set("n", "<leader>sq", function()
+  if vim.fn.executable("pg_format") == 0 then
+    vim.notify("pg_format not installed", vim.log.levels.ERROR)
+    return
+  end
+  vim.cmd(":%!pg_format --spaces 2 --function-case 2")
+end, { desc = "Format SQL with pg_format" })
 
 -- Fast saving
 vim.keymap.set("n", '<leader>w', ':write!<CR>')
@@ -1404,6 +1419,12 @@ vim.keymap.set('n', '<leader>fb', ':FzfLua buffers<CR>', {})
 -- search
 vim.keymap.set('n', '<leader>gs', ':FzfLua grep_project<CR>', {})
 vim.keymap.set('n', '<leader>lg', ':FzfLua live_grep<CR>', {})
+vim.keymap.set('n', '<leader>lm', function()
+  require('fzf-lua').live_grep({
+    prompt = 'Java Methods> ',
+    rg_opts = "--column --line-number --no-heading --color=always --smart-case --max-columns=4096 -g '*.java' -e '(public|private|protected|static|\\s) +[\\w\\<\\>\\[\\]]+\\s+(\\w+) *\\('",
+  })
+end, { desc = "Search Java methods" })
 -- diagnostic
 vim.keymap.set('n', '<leader>td', ':FzfLua diagnostics_workspace<CR>', {})
 -- history
