@@ -1342,8 +1342,25 @@ vim.lsp.config('gopls', {
 vim.lsp.enable('gopls')
 
 vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = { "*.json" },
+  callback = function()
+    if vim.fn.executable("jq") == 1 then
+      local cursor = vim.api.nvim_win_get_cursor(0)
+      vim.cmd(":%!jq .")
+      pcall(vim.api.nvim_win_set_cursor, 0, cursor)
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = {  "*.java" },
   callback = function()
+    -- Format if LSP supports it
+    local clients = vim.lsp.get_clients({ bufnr = 0, method = "textDocument/formatting" })
+    if #clients > 0 then
+      vim.lsp.buf.format({ async = false, timeout_ms = 1000 })
+    end
+
     -- Synchronous organizeImports to avoid race condition with save
     local params = vim.lsp.util.make_range_params()
     params.context = { only = { "source.organizeImports" } }
