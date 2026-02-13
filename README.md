@@ -90,6 +90,24 @@ Complete list of all commands, keybindings, and features configured in init.lua.
 | `,gi` | Normal | `:LazyGit` | Open LazyGit UI |
 | `,gp` | Normal | `:Gdiff` | Git diff current file |
 | `,gb` | Normal | `:G blame` | Git blame |
+| `,BB` | Normal | `:Gitsigns toggle_current_line_blame` | Toggle inline git blame (virtual text) |
+
+#### Gitsigns - Hunk Navigation & Actions
+| Key | Mode | Command | Description |
+|-----|------|---------|-------------|
+| `]c` | Normal | `next_hunk` | Go to next git hunk |
+| `[c` | Normal | `prev_hunk` | Go to previous git hunk |
+| `,hs` | Normal/Visual | `stage_hunk` | Stage current hunk |
+| `,hr` | Normal/Visual | `reset_hunk` | Reset current hunk |
+| `,hS` | Normal | `stage_buffer` | Stage entire buffer |
+| `,hR` | Normal | `reset_buffer` | Reset entire buffer |
+| `,hu` | Normal | `undo_stage_hunk` | Undo stage hunk |
+| `,hp` | Normal | `preview_hunk` | Preview hunk in floating window |
+| `,hb` | Normal | `blame_line` | Show full blame for current line |
+| `,hd` | Normal | `diffthis` | Diff against index |
+| `,hD` | Normal | `diffthis('~')` | Diff against last commit |
+| `,td` | Normal | `toggle_deleted` | Toggle deleted lines display |
+| `ih` | Operator/Visual | `select_hunk` | Select hunk text object |
 
 ### Undo History (undotree)
 | Key | Mode | Command | Description |
@@ -437,7 +455,7 @@ See respective plugin sections above for:
 **Files**: `,w` save | `,q` quit | `,ff` find files | `,fb` buffers  
 **Navigation**: `gd` definition | `gr` references | `K` hover | `,n` file tree  
 **Search**: `,gs` grep | `,lg` live grep | `*` search word  
-**Git**: `,gi` lazygit | `,gb` blame | `,gp` diff  
+**Git**: `,gi` lazygit | `,gb` blame | `,gp` diff | `,BB` inline blame  
 **Go**: `,b` build | `,r` run | `,t` test | `,tt` toggle test  
 **Java**: `,jb` maven build | `,jt` maven test | `,jc` jdtls compile  
 **Debug**: `<Space>b` breakpoint | `<F1>` continue | `<F2>` step into | `<F3>` step over  

@@ -1,6 +1,11 @@
+-- This comes first, because we have mappings that depend on leader
+-- With a map leader it's possible to do extra key combinations
+-- i.e: <leader>w saves the current file
+vim.g.mapleader = ','
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
   vim.fn.system({
     "git",
     "clone",
@@ -76,7 +81,54 @@ require("lazy").setup({
     'lewis6991/gitsigns.nvim',
     -- tag = 'release', -- To use the latest release (do not use this if you run Neovim nightly or dev builds!)
     config = function()
-      require("gitsigns").setup({})
+      require("gitsigns").setup({
+        current_line_blame = false, -- Toggle with ,BB
+        current_line_blame_opts = {
+          virt_text = true,
+          virt_text_pos = 'eol', -- 'eol' | 'overlay' | 'right_align'
+          delay = 100,
+        },
+        on_attach = function(bufnr)
+          -- Set a visible highlight for blame text (after colorscheme loads)
+          vim.api.nvim_set_hl(0, 'GitSignsCurrentLineBlame', { 
+            fg = '#928374', -- Gruvbox gray (visible but not too bright)
+            italic = true,
+            bold = false
+          })
+          local gs = package.loaded.gitsigns
+
+          -- Navigation between hunks
+          vim.keymap.set('n', ']c', function()
+            if vim.wo.diff then return ']c' end
+            vim.schedule(function() gs.next_hunk() end)
+            return '<Ignore>'
+          end, { expr = true, buffer = bufnr, desc = "Next hunk" })
+
+          vim.keymap.set('n', '[c', function()
+            if vim.wo.diff then return '[c' end
+            vim.schedule(function() gs.prev_hunk() end)
+            return '<Ignore>'
+          end, { expr = true, buffer = bufnr, desc = "Previous hunk" })
+
+          -- Actions
+          vim.keymap.set('n', '<leader>hs', gs.stage_hunk, { buffer = bufnr, desc = "Stage hunk" })
+          vim.keymap.set('n', '<leader>hr', gs.reset_hunk, { buffer = bufnr, desc = "Reset hunk" })
+          vim.keymap.set('v', '<leader>hs', function() gs.stage_hunk({vim.fn.line('.'), vim.fn.line('v')}) end, { buffer = bufnr, desc = "Stage hunk" })
+          vim.keymap.set('v', '<leader>hr', function() gs.reset_hunk({vim.fn.line('.'), vim.fn.line('v')}) end, { buffer = bufnr, desc = "Reset hunk" })
+          vim.keymap.set('n', '<leader>hS', gs.stage_buffer, { buffer = bufnr, desc = "Stage buffer" })
+          vim.keymap.set('n', '<leader>hu', gs.undo_stage_hunk, { buffer = bufnr, desc = "Undo stage hunk" })
+          vim.keymap.set('n', '<leader>hR', gs.reset_buffer, { buffer = bufnr, desc = "Reset buffer" })
+          vim.keymap.set('n', '<leader>hp', gs.preview_hunk, { buffer = bufnr, desc = "Preview hunk" })
+          vim.keymap.set('n', '<leader>hb', function() gs.blame_line({full=true}) end, { buffer = bufnr, desc = "Blame line" })
+          vim.keymap.set('n', '<leader>BB', '<cmd>Gitsigns toggle_current_line_blame<CR>', { buffer = bufnr, desc = "Toggle inline blame" })
+          vim.keymap.set('n', '<leader>hd', gs.diffthis, { buffer = bufnr, desc = "Diff this" })
+          vim.keymap.set('n', '<leader>hD', function() gs.diffthis('~') end, { buffer = bufnr, desc = "Diff this ~" })
+          vim.keymap.set('n', '<leader>td', gs.toggle_deleted, { buffer = bufnr, desc = "Toggle deleted" })
+
+          -- Text object
+          vim.keymap.set({'o', 'x'}, 'ih', ':<C-U>Gitsigns select_hunk<CR>', { buffer = bufnr, desc = "Select hunk" })
+        end
+      })
     end,
   },
 
@@ -162,35 +214,6 @@ require("lazy").setup({
   {
     'mfussenegger/nvim-jdtls',
     ft = 'java',
-    root_markers = {'.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle', 'build.gradle.kts'},
-
-    settings = {
-      java = {
-        eclipse = { downloadSources = true },
-        maven = { downloadSources = true },
-        contentProvider = { preferred = 'fernflower' },
-        signatureHelp = { enabled = true },
-        implementationsCodeLens = { enabled = true },
-        -- Completion filtering - exclude internal/generated classes
-        completion = {
-          filteredTypes = {
-            "com.sun.*",
-            "sun.*",
-            "jdk.internal.*",
-            "org.graalvm.*",
-            "io.micrometer.shaded.*",
-          },
-        },
-        -- Import ordering: java → javax → com → org
-        imports = {
-          order = { "java", "javax", "com", "org" },
-        },
-        inlayHints = {
-          parameterNames = { enabled = "all" },
-        },
-      }
-    },
-
     config = function()
       -- Wird jedes Mal ausgeführt, wenn eine .java Datei geöffnet wird
       local jdtls = require("jdtls")
@@ -208,14 +231,22 @@ require("lazy").setup({
           "-Dosgi.bundles.defaultStartLevel=4",
           "-Declipse.product=org.eclipse.jdt.ls.core.product",
           "-Dlog.protocol=true",
-          "-Dlog.level=ALL",
+          "-Dlog.level=WARN",
           "-Xmx2g",
+          "-XX:+UseG1GC",
+          "-XX:GCTimeRatio=4",
+          "-XX:AdaptiveSizePolicyWeight=90",
           "--add-modules=ALL-SYSTEM",
           "--add-opens", "java.base/java.util=ALL-UNNAMED",
           "--add-opens", "java.base/java.lang=ALL-UNNAMED",
           "-javaagent:" .. jdtls_path .. "/lombok.jar",
           "-jar", vim.fn.glob(jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar"),
-          "-configuration", jdtls_path .. "/config_" .. (vim.fn.has("mac") == 1 and "mac" or "linux"),
+          "-configuration", jdtls_path .. "/config_" .. (function()
+            if vim.fn.has("mac") == 1 then
+              return vim.fn.system("uname -m"):find("arm64") and "mac_arm" or "mac"
+            end
+            return "linux"
+          end)(),
           "-data", vim.fn.stdpath("cache") .. "/jdtls/workspace/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t"),
         },
 
@@ -237,14 +268,36 @@ require("lazy").setup({
             maven = { downloadSources = true },
             references = { includeDecompiledSources = true },
             referencesCodeLens = { enabled = true },
+            implementationsCodeLens = { enabled = true },
+            signatureHelp = { enabled = true },
+            contentProvider = { preferred = 'fernflower' },
 
-            inlayHints = {
-              parameterNames = { enabled = "all" },
+            configuration = {
+              runtimes = {
+                {
+                  name = "JavaSE-21",
+                  path = os.getenv("JAVA_HOME") or os.getenv("HOME") .. "/.sdkman/candidates/java/current",
+                  default = true,
+                },
+              },
+            },
+
+            completion = {
+              filteredTypes = {
+                "com.sun.*",
+                "sun.*",
+                "jdk.internal.*",
+                "org.graalvm.*",
+                "io.micrometer.shaded.*",
+              },
+            },
+
+            imports = {
+              order = { "java", "javax", "com", "org" },
             },
 
             format = {
               enabled = true,
-              --settings = { url = "... dein google-style.xml oder so ..." },
             },
 
             symbols = {
@@ -261,7 +314,6 @@ require("lazy").setup({
           -- z. B. require("lspconfig").util.default_on_attach(client, bufnr)
           -- JDTLS-spezifische Befehle / extended capabilities
           jdtls.extendedClientCapabilities = jdtls.extendedClientCapabilities
-          require("jdtls.setup").add_commands()           -- fügt :JdtCompile, :JdtShowLogs etc. hinzu
 
           -- WICHTIG: DAP-Setup für Java-Debugging
           require('jdtls').setup_dap({ hotcodereplace = 'auto' })
@@ -411,6 +463,12 @@ require("lazy").setup({
           'kotlin_language_server' 
         },
         automatic_installation = true,
+        -- Don't auto-configure jdtls — nvim-jdtls handles it
+        handlers = {
+          function(server_name)
+            if server_name == 'jdtls' then return end
+          end,
+        },
       })
 
       -- Ensure Java debugging tools are installed
@@ -522,6 +580,8 @@ require("lazy").setup({
           --          "rust",
           "go",
           "gomod",
+          "gosum",
+          "gotmpl",
           "diff",
           "dockerfile",
           "bash",
@@ -561,7 +621,7 @@ require("lazy").setup({
           -- Disable slow treesitter highlight for large files
           disable = function(lang, buf)
             local max_filesize = 100 * 1024 -- 100 KB
-            local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+            local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
             if ok and stats and stats.size > max_filesize then
               return true
             end
@@ -643,6 +703,7 @@ require("lazy").setup({
     dependencies = {
       "hrsh7th/cmp-nvim-lsp",
       "hrsh7th/cmp-buffer",
+      "hrsh7th/cmp-path",
       "L3MON4D3/LuaSnip",
       "saadparwaiz1/cmp_luasnip",
       "onsails/lspkind-nvim",
@@ -724,6 +785,7 @@ require("lazy").setup({
           { name = "nvim_lsp", }, -- priority = 9 },
           { name = "luasnip",  keyword_length = 2 },
           { name = "buffer",   keyword_length = 5 },
+          { name = "path" },
         },
         performance = {
           -- It is recommended to increase the timeout duration due to
@@ -818,6 +880,7 @@ vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
 vim.opt.termguicolors = true                      -- Enable 24-bit RGB colors
+vim.opt.signcolumn = "yes"                        -- Always show sign column to avoid gutter jumps
 
 vim.opt.relativenumber = true                     -- Show line numbers
 vim.opt.showmatch = true                          -- Highlight matching parenthesis
@@ -834,7 +897,7 @@ vim.opt.smartcase = true                          -- ... but not it begins with 
 vim.opt.completeopt = 'menuone,noinsert,noselect' -- Autocomplete options
 
 vim.opt.undofile = true
-vim.opt.undodir = vim.fn.stdpath("data") .. "undo"
+vim.opt.undodir = vim.fn.stdpath("data") .. "/undo"
 
 -- Indent Settings
 -- I'm in the Spaces camp (sorry Tabs folks), so I'm using a combination of
@@ -848,7 +911,7 @@ vim.opt.wrap = true
 -- This comes first, because we have mappings that depend on leader
 -- With a map leader it's possible to do extra key combinations
 -- i.e: <leader>w saves the current file
-vim.g.mapleader = ','
+-- (mapleader is set at the top of the file, before lazy.setup)
 
 -- global cwd
 vim.g.mycwd = vim.fn.getcwd()
@@ -901,6 +964,9 @@ vim.keymap.set('n', '<leader>gi', ':LazyGit<CR>')
 -- setup mapping for git
 vim.keymap.set("n", "<leader>gp", ":Gdiff<CR>", {})
 vim.keymap.set("n", "<leader>gb", ":G blame<CR>", {})
+
+-- Global git blame toggle (works even if gitsigns hasn't attached)
+vim.keymap.set('n', '<leader>BB', '<cmd>Gitsigns toggle_current_line_blame<CR>', { desc = "Toggle git blame (global)" })
 
 -- Don't jump forward if I higlight and search for a word
 local function stay_star()
@@ -1007,10 +1073,15 @@ vim.keymap.set('n', '<leader>gv', ':write!<CR>:GoAltV!<CR>', { noremap = true, s
 vim.keymap.set('n', '<leader>tt', ':write!<CR>:GoAlt!<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<leader>gc', ':GoCoverage<CR>', { desc = "Go coverage" })
 vim.keymap.set('n', '<leader>gC', ':GoCoverageClear<CR>', { desc = "Clear coverage" })
+vim.keymap.set('n', '<leader>gat', ':GoAddTag<CR>', { desc = "Add struct tags" })
+vim.keymap.set('n', '<leader>grt', ':GoRmTag<CR>', { desc = "Remove struct tags" })
 
 -- Java build/run commands (non-blocking, live output in terminal split)
 vim.keymap.set('n', '<leader>jb', '<cmd>write!<CR><cmd>belowright 15split | terminal mvn clean compile<CR>', { desc = "Maven build" })
 vim.keymap.set('n', '<leader>jt', '<cmd>write!<CR><cmd>belowright 15split | terminal mvn test<CR>', { desc = "Maven test" })
+vim.keymap.set('n', '<leader>jT', function()
+  require('jdtls').test_class()
+end, { desc = "Run test class (no debug)" })
 vim.keymap.set('n', '<leader>jc', function()
   require('jdtls').compile('full')
 end, { desc = "JDTLS full compile" })
@@ -1037,7 +1108,7 @@ vim.keymap.set('n', '<leader>fh', ':FzfLua command_history<CR>', {})
 -- diagnostics
 vim.keymap.set('n', '<leader>do', vim.diagnostic.open_float)
 vim.keymap.set('n', '<leader>dp', vim.diagnostic.goto_prev)
-vim.keymap.set('n', '<leader>dn', vim.diagnostic.goto_next)
+vim.keymap.set('n', '<leader>dd', vim.diagnostic.goto_next)
 vim.keymap.set('n', '<leader>ds', vim.diagnostic.setqflist)
 
 -- Configure diagnostics display (no inline text, but show signs and underlines)
@@ -1094,6 +1165,34 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
     vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
 
+    -- Inlay hints toggle (if supported by LSP)
+    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+    if client and client.server_capabilities.inlayHintProvider then
+      -- Enable inlay hints by default for Go and Lua (Java enabled in jdtls on_attach)
+      if vim.bo[ev.buf].filetype == 'go' or vim.bo[ev.buf].filetype == 'lua' then
+        vim.lsp.inlay_hint.enable(true, { bufnr = ev.buf })
+      end
+      
+      -- Toggle keybinding
+      vim.keymap.set('n', '<leader>lh', function()
+        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf }))
+      end, { buffer = ev.buf, desc = "Toggle inlay hints" })
+    end
+
+    -- Codelens support (if supported by LSP)
+    if client and client.server_capabilities.codeLensProvider then
+      -- Refresh codelens on certain events
+      vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave" }, {
+        buffer = ev.buf,
+        callback = function()
+          vim.lsp.codelens.refresh({ bufnr = ev.buf })
+        end,
+      })
+      
+      -- Run codelens action under cursor
+      vim.keymap.set('n', '<leader>cl', vim.lsp.codelens.run, { buffer = ev.buf, desc = "Run codelens" })
+    end
+
     -- Java-specific debugging keybindings
     if vim.bo.filetype == 'java' then
       vim.keymap.set('n', '<leader>df', "<cmd>lua require('jdtls').test_class()<CR>", { buffer = ev.buf, desc = "Debug test class" })
@@ -1103,26 +1202,19 @@ vim.api.nvim_create_autocmd('LspAttach', {
 })
 
 -- Trouble
-vim.keymap.set("n", "<leader>xx", "<cmd>TroubleToggle<cr>", { silent = true, noremap = true })
-vim.keymap.set("n", "<leader>xw", "<cmd>TroubleToggle workspace_diagnostics<cr>", { silent = true, noremap = true })
-vim.keymap.set("n", "<leader>xd", "<cmd>TroubleToggle document_diagnostics<cr>", { silent = true, noremap = true })
-vim.keymap.set("n", "<leader>xl", "<cmd>TroubleToggle loclist<cr>", { silent = true, noremap = true })
-vim.keymap.set("n", "<leader>xq", "<cmd>TroubleToggle quickfix<cr>", { silent = true, noremap = true })
-vim.keymap.set("n", "gR", "<cmd>TroubleToggle lsp_references<cr>", { silent = true, noremap = true })
+vim.keymap.set("n", "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", { silent = true, noremap = true, desc = "Workspace diagnostics" })
+vim.keymap.set("n", "<leader>xd", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", { silent = true, noremap = true, desc = "Document diagnostics" })
+vim.keymap.set("n", "<leader>xl", "<cmd>Trouble loclist toggle<cr>", { silent = true, noremap = true })
+vim.keymap.set("n", "<leader>xq", "<cmd>Trouble quickfix toggle<cr>", { silent = true, noremap = true })
+vim.keymap.set("n", "gR", "<cmd>Trouble lsp_references toggle<cr>", { silent = true, noremap = true })
 
 -- folding
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "*", -- or "*" for all types
-  callback = function()
-    vim.opt_local.foldmethod     = "expr"
-    vim.opt_local.foldexpr       = "nvim_treesitter#foldexpr()"
-    vim.opt_local.foldlevelstart = 99
-    vim.opt.foldenable           = false
-  end,
-})
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
+vim.opt.foldenable = false
 
 -- automatically resize all vim buffers if I resize the terminal window
-vim.api.nvim_command('autocmd VimResized * wincmd =')
+vim.api.nvim_create_autocmd("VimResized", { command = "wincmd =" })
 vim.keymap.set("n", "<leader>ls", "<cmd>lua require(\"luasnip.loaders\").edit_snippet_files()<cr>",
 { silent = true, noremap = true })
 -- vim.lsp.set_log_level("debug")
@@ -1213,6 +1305,13 @@ vim.lsp.config('gopls', {
   settings = {
     gopls = {
       usePlaceholders = true,
+      analyses = {
+        unusedparams = true,
+        shadow = true,
+        nilness = true,
+        unusedwrite = true,
+        useany = true,
+      },
       codelenses = {
         gc_details = false,
         generate = true,
@@ -1245,9 +1344,18 @@ vim.lsp.enable('gopls')
 vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = {  "*.java" },
   callback = function()
-    vim.lsp.buf.code_action({
-      context = { only = { "source.organizeImports" } },
-      apply = true,
-    })
+    -- Synchronous organizeImports to avoid race condition with save
+    local params = vim.lsp.util.make_range_params()
+    params.context = { only = { "source.organizeImports" } }
+    local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 1000)
+    for _, res in pairs(result or {}) do
+      for _, action in pairs(res.result or {}) do
+        if action.edit then
+          vim.lsp.util.apply_workspace_edit(action.edit, "utf-8")
+        elseif action.command then
+          vim.lsp.buf.execute_command(action.command)
+        end
+      end
+    end
   end,
 })
