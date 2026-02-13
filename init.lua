@@ -1354,7 +1354,10 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 
 vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = {  "*.java" },
-  callback = function()
+  callback = function(ev)
+    -- Disable inlay hints before formatting (Neovim 0.11.x bug workaround)
+    pcall(vim.lsp.inlay_hint.enable, false, { bufnr = ev.buf })
+
     -- Format if LSP supports it
     local clients = vim.lsp.get_clients({ bufnr = 0, method = "textDocument/formatting" })
     if #clients > 0 then
