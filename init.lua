@@ -689,12 +689,54 @@ require("lazy").setup({
 
   -- AI autocompletion
   {
-    "github/copilot.vim",
+    "Exafunction/windsurf.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "hrsh7th/nvim-cmp",
+    },
     config = function()
-      vim.g.copilot_no_tab_map = true
-      vim.keymap.set('i', '<C-L>', '<Plug>(copilot-accept-word)')
-      vim.api.nvim_set_hl(0, 'CopilotSuggestion', { fg = '#E3242B', ctermfg = 8 })
-      vim.g.copilot_enterprise_uri = 'https://bmw.ghe.com'
+      require("codeium").setup({
+        -- Optionally disable cmp source if using virtual text only
+        enable_cmp_source = false,
+        virtual_text = {
+          enabled = true,
+
+          -- These are the defaults
+
+          -- Set to true if you never want completions to be shown automatically.
+          manual = false,
+          -- A mapping of filetype to true or false, to enable virtual text.
+          filetypes = {},
+          -- Whether to enable virtual text of not for filetypes not specifically listed above.
+          default_filetype_enabled = true,
+          -- How long to wait (in ms) before requesting completions after typing stops.
+          idle_delay = 75,
+          -- Priority of the virtual text. This usually ensures that the completions appear on top of
+          -- other plugins that also add virtual text, such as LSP inlay hints, but can be modified if
+          -- desired.
+          virtual_text_priority = 65535,
+          -- Set to false to disable all key bindings for managing completions.
+          map_keys = true,
+          -- The key to press when hitting the accept keybinding but no completion is showing.
+          -- Defaults to \t normally or <c-n> when a popup is showing. 
+          accept_fallback = nil,
+          -- Key bindings for managing completions in virtual text mode.
+          key_bindings = {
+            -- Accept the current completion.
+            accept = "<C-j>",
+            -- Accept the next word.
+            accept_word = false,
+            -- Accept the next line.
+            accept_line = false,
+            -- Clear the virtual text.
+            clear = false,
+            -- Cycle to the next completion.
+            next = "<M-n>",
+            -- Cycle to the previous completion.
+            prev = "<M-p>",
+          }
+        }
+      })
     end
   },
 
@@ -783,6 +825,7 @@ require("lazy").setup({
         },
         sources = {
           { name = "nvim_lsp", }, -- priority = 9 },
+          { name = "codeium" },
           { name = "luasnip",  keyword_length = 2 },
           { name = "buffer",   keyword_length = 5 },
           { name = "path" },
@@ -981,11 +1024,6 @@ vim.keymap.set('n', '*', stay_star, { noremap = true, silent = true })
 -- lines vertically, insert stuff, they get lost for all lines if we use
 -- ctrl-c, but not if we use ESC. So just let's assume Ctrl-c is ESC.
 vim.keymap.set('i', '<C-c>', '<ESC>')
-
--- If I visually select words and paste from clipboard, don't replace my
--- clipboard with the selected word, instead keep my old word in the
--- clipboard
-vim.keymap.set("x", "p", "\"_dP")
 
 -- rename the word under the cursor
 vim.keymap.set("n", "<leader>rw", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
@@ -1218,12 +1256,6 @@ vim.api.nvim_create_autocmd("VimResized", { command = "wincmd =" })
 vim.keymap.set("n", "<leader>ls", "<cmd>lua require(\"luasnip.loaders\").edit_snippet_files()<cr>",
 { silent = true, noremap = true })
 -- vim.lsp.set_log_level("debug")
-
--- copilot config
-vim.keymap.set('i', '<C-J>', 'copilot#Accept("\\<CR>")', {
-  expr = true,
-  replace_keycodes = false
-})
 
 -- yanky.nvim
 vim.keymap.set({ "n", "x" }, "p", "<Plug>(YankyPutAfter)")
