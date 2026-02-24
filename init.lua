@@ -825,7 +825,6 @@ require("lazy").setup({
         },
         sources = {
           { name = "nvim_lsp", }, -- priority = 9 },
-          { name = "codeium" },
           { name = "luasnip",  keyword_length = 2 },
           { name = "buffer",   keyword_length = 5 },
           { name = "path" },
@@ -1332,6 +1331,7 @@ vim.lsp.config('lua_ls', {
 vim.lsp.enable('lua_ls')
 
 vim.lsp.config('gopls', {
+  capabilities = capabilities,
   filetypes = { "go", "gomod", "gowork", "gohtml", "gotmpl", "go.html", "go.tmpl" },
   root_markers = { 'go.mod' },
   settings = {
@@ -1372,6 +1372,15 @@ vim.lsp.config('gopls', {
   }
 })
 vim.lsp.enable('gopls')
+
+
+-- start workaround
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "go",
+  callback = function()
+    vim.lsp.start({ name = 'gopls', cmd = {'gopls'} })
+  end,
+})
 
 vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = { "*.json" },
